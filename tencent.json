@@ -1,0 +1,11 @@
+{
+    "optimizer": "SGD",
+    "batch_size": 256,
+    "lr": 0.0005,
+    "dataset": "tencent",
+    "tasks": ["H", "C", "F", "O"],
+    "normalization_type": "loss",
+    "algorithm": "mgda",
+    "use_approximation": true,
+    "scales": {"H":0.25, "C":0.25, "F":0.25,  "O":0.25}
+}

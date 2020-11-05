@@ -142,3 +142,4 @@ cython_debug/
 runs/
 PATH_FOR_MULTIMNIST_DATASET/
 Qomex_2020_mobile_game_imges/
+*.ipynb

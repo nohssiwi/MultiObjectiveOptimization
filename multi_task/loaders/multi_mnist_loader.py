@@ -249,23 +249,24 @@ if __name__ == '__main__':
         return transforms.Compose([transforms.ToTensor(),
                                    transforms.Normalize((0.1307,), (0.3081,))])
 
-    dst = MNIST(root='/home/ozansener/Data/MultiMNIST/', train=True, download=True, transform=global_transformer(), multi=True)
+    dst = MNIST(root='../../PATH_FOR_MULTIMNIST_DATASET', train=True, download=True, transform=global_transformer(), multi=True)
     loader = torch.utils.data.DataLoader(dst, batch_size=10, shuffle=True, num_workers=4)
-    for dat in loader:
-        ims = dat[0].view(10,28,28).numpy()
+    print(dst[0])
+    # for dat in loader:
+    #     ims = dat[0].view(10,28,28).numpy()
 
-        labs_l = dat[1]
-        labs_r = dat[2]
-        f, axarr = plt.subplots(2,5)
-        for j in range(5):
-            for i in range(2):
-                axarr[i][j].imshow(ims[j*2+i,:,:], cmap='gray')
-                axarr[i][j].set_title('{}_{}'.format(labs_l[j*2+i],labs_r[j*2+i]))
-        plt.show()
-        a = input()
-        if a == 'ex':
-            break
-        else:
-            plt.close()
+    #     labs_l = dat[1]
+    #     labs_r = dat[2]
+    #     f, axarr = plt.subplots(2,5)
+    #     for j in range(5):
+    #         for i in range(2):
+    #             axarr[i][j].imshow(ims[j*2+i,:,:], cmap='gray')
+    #             axarr[i][j].set_title('{}_{}'.format(labs_l[j*2+i],labs_r[j*2+i]))
+    #     plt.show()
+    #     a = input()
+    #     if a == 'ex':
+    #         break
+    #     else:
+    #         plt.close()
 
 

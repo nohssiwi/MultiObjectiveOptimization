@@ -85,3 +85,9 @@ def get_loss(params):
         for t in params['tasks']:
             loss_fn[t] = nll
         return loss_fn
+
+    if 'tencent' in params['dataset']:
+        loss_fn = {}
+        for t in params['tasks']:
+            loss_fn[t] = nll
+        return loss_fn

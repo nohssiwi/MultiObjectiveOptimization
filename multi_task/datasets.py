@@ -5,6 +5,8 @@ from loaders.cityscapes_loader import CITYSCAPES
 from loaders.segmentation_augmentations import *
 from loaders.celeba_loader import CELEBA
 
+from loaders.tencent_loader import TENCENT
+
 # Setup Augmentations
 cityscapes_augmentations= Compose([RandomRotate(10),
                                    RandomHorizontallyFlip()])
@@ -37,6 +39,14 @@ def get_dataset(params, configs):
     if 'celeba' in params['dataset']:
         train_dst = CELEBA(root=configs['celeba']['path'], is_transform=True, split='train', img_size=(configs['celeba']['img_rows'], configs['celeba']['img_cols']), augmentations=None)
         val_dst = CELEBA(root=configs['celeba']['path'], is_transform=True, split='val', img_size=(configs['celeba']['img_rows'], configs['celeba']['img_cols']), augmentations=None)
+
+        train_loader = torch.utils.data.DataLoader(train_dst, batch_size=params['batch_size'], shuffle=True, num_workers=4)
+        val_loader = torch.utils.data.DataLoader(val_dst, batch_size=params['batch_size'], num_workers=4)
+        return train_loader, train_dst, val_loader, val_dst
+    
+    if 'tencent' in params['dataset']:
+        train_dst = TENCENT(root=configs['tencent']['path'], is_transform=True, split='train', img_size=(configs['tencent']['img_rows'], configs['tencent']['img_cols']), augmentations=None)
+        val_dst = TENCENT(root=configs['tencent']['path'], is_transform=True, split='val', img_size=(configs['tencent']['img_rows'], configs['tencent']['img_cols']), augmentations=None)
 
         train_loader = torch.utils.data.DataLoader(train_dst, batch_size=params['batch_size'], shuffle=True, num_workers=4)
         val_loader = torch.utils.data.DataLoader(val_dst, batch_size=params['batch_size'], num_workers=4)

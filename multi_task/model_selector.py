@@ -2,6 +2,9 @@ from models.multi_lenet import MultiLeNetO, MultiLeNetR
 from models.segnet import SegnetEncoder, SegnetInstanceDecoder, SegnetSegmentationDecoder, SegnetDepthDecoder
 from models.pspnet import SegmentationDecoder, get_segmentation_encoder
 from models.multi_faces_resnet import ResNet, FaceAttributeDecoder, BasicBlock
+
+from models.tencent_resnet import TencentDecoder
+
 import torchvision.models as model_collection
 
 
@@ -42,6 +45,15 @@ def get_model(params):
         model['rep'].cuda()
         for t in params['tasks']:
             model[t] = FaceAttributeDecoder()
+            model[t].cuda()
+        return model
+
+    if 'tencent' in data:
+        model = {}
+        model['rep'] = ResNet(BasicBlock, [2,2,2,2])
+        model['rep'].cuda()
+        for t in params['tasks']:
+            model[t] = TencentDecoder()
             model[t].cuda()
         return model
 
