@@ -78,10 +78,10 @@ def train_multi_task(param_file):
     for epoch in tqdm(range(NUM_EPOCHS)):
         start = timer()
         print('Epoch {} Started'.format(epoch))
-        if (epoch+1) % 10 == 0:
+        if (epoch+1) % 30 == 0:
             # Every 50 epoch, half the LR
             for param_group in optimizer.param_groups:
-                param_group['lr'] *= 0.85
+                param_group['lr'] *= 0.5
             print('Half the learning rate{}'.format(n_iter))
 
         for m in model:
@@ -113,7 +113,8 @@ def train_multi_task(param_file):
                 if approximate_norm_solution:
                     optimizer.zero_grad()
                     # First compute representations (z)
-                    images_volatile = Variable(images.data, volatile=True)
+                    with torch.no_grad():
+                        images_volatile = Variable(images.data)
                     rep, mask = model['rep'](images_volatile, mask)
                     # As an approximate solution we only need gradients for input
                     if isinstance(rep, list):
@@ -130,14 +131,16 @@ def train_multi_task(param_file):
                         optimizer.zero_grad()
                         out_t, masks[t] = model[t](rep_variable, None)
                         loss = loss_fn[t](out_t, labels[t])
-                        loss_data[t] = loss.data[0]
+                        loss_data[t] = loss.item()
                         loss.backward()
-                        grads[t] = []
+                        # grads[t] = []
                         if list_rep:
-                            grads[t].append(Variable(rep_variable[0].grad.data.clone(), requires_grad=False))
+                            # grads[t].append(Variable(rep_variable[0].grad.data.clone(), requires_grad=False))
+                            grads[t] = Variable(rep_variable[0].grad.data.clone(), requires_grad=False)
                             rep_variable[0].grad.data.zero_()
                         else:
-                            grads[t].append(Variable(rep_variable.grad.data.clone(), requires_grad=False))
+                            # grads[t].append(Variable(rep_variable.grad.data.clone(), requires_grad=False))
+                            grads[t] = Variable(rep_variable.grad.data.clone(), requires_grad=False)
                             rep_variable.grad.data.zero_()
                 else:
                     # This is MGDA
@@ -147,7 +150,7 @@ def train_multi_task(param_file):
                         rep, mask = model['rep'](images, mask)
                         out_t, masks[t] = model[t](rep, None)
                         loss = loss_fn[t](out_t, labels[t])
-                        loss_data[t] = loss.data[0]
+                        loss_data[t] = loss.item()
                         loss.backward()
                         grads[t] = []
                         for param in model['rep'].parameters():
@@ -175,7 +178,7 @@ def train_multi_task(param_file):
             for i, t in enumerate(tasks):
                 out_t, _ = model[t](rep, masks[t])
                 loss_t = loss_fn[t](out_t, labels[t])
-                loss_data[t] = loss_t.data[0]
+                loss_data[t] = loss_t.item()
                 if i > 0:
                     loss = loss + scale[t]*loss_t
                 else:
@@ -183,7 +186,7 @@ def train_multi_task(param_file):
             loss.backward()
             optimizer.step()
 
-            writer.add_scalar('training_loss', loss.data[0], n_iter)
+            writer.add_scalar('training_loss', loss.item(), n_iter)
             for t in tasks:
                 writer.add_scalar('training_loss_{}'.format(t), loss_data[t], n_iter)
 
@@ -199,21 +202,23 @@ def train_multi_task(param_file):
 
         num_val_batches = 0
         for batch_val in val_loader:
-            val_images = Variable(batch_val[0].cuda(), volatile=True)
+            with torch.no_grad():
+                val_images = Variable(batch_val[0].cuda())
             labels_val = {}
 
             for i, t in enumerate(all_tasks):
                 if t not in tasks:
                     continue
                 labels_val[t] = batch_val[i+1]
-                labels_val[t] = Variable(labels_val[t].cuda(), volatile=True)
+                with torch.no_grad():
+                    labels_val[t] = Variable(labels_val[t].cuda())
 
             val_rep, _ = model['rep'](val_images, None)
             for t in tasks:
                 out_t_val, _ = model[t](val_rep, None)
                 loss_t = loss_fn[t](out_t_val, labels_val[t])
-                tot_loss['all'] += loss_t.data[0]
-                tot_loss[t] += loss_t.data[0]
+                tot_loss['all'] += loss_t.item()
+                tot_loss[t] += loss_t.item()
                 metric[t].update(out_t_val, labels_val[t])
             num_val_batches+=1
 
