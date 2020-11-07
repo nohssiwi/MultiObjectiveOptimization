@@ -91,11 +91,43 @@ class ResNet(nn.Module):
 
 
 class TencentDecoder(nn.Module):
-    def __init__(self):
+    def __init__(self, num_class=4, fc_dim=2048, pool_scales=(1, 2, 3, 6), task_type='C'):
         super(TencentDecoder, self).__init__()
-        self.linear = nn.Linear(2048, 2)
-    
-    def forward(self, x, mask):
-        x = self.linear(x)
-        out = F.log_softmax(x, dim=1)
-        return out, mask
+
+        self.task_type = task_type
+
+        self.ppm = []
+        for scale in pool_scales:
+            self.ppm.append(nn.Sequential(
+                nn.AdaptiveAvgPool2d(scale),
+                nn.Conv2d(fc_dim, 512, kernel_size=1, bias=False),
+                nn.BatchNorm2d(512),
+                nn.ReLU(inplace=True)
+            ))
+        self.ppm = nn.ModuleList(self.ppm)
+
+        self.conv_last = nn.Sequential(
+            nn.Conv2d(fc_dim+len(pool_scales)*512, 512,
+                      kernel_size=3, padding=1, bias=False),
+            nn.BatchNorm2d(512),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(512, num_class, kernel_size=1)
+        )
+
+    def forward(self, conv_out, mask):
+        conv5 = conv_out[-1]
+
+        input_size = conv5.size()
+        ppm_out = [conv5]
+        for pool_scale in self.ppm:
+            ppm_out.append(nn.functional.upsample(
+                pool_scale(conv5),
+                (input_size[2], input_size[3]),
+                mode='bilinear'))
+        ppm_out = torch.cat(ppm_out, 1)
+
+        x = self.conv_last(ppm_out)
+
+        if self.task_type == 'C':
+            x = nn.functional.log_softmax(x, dim=1)
+        return x, mask

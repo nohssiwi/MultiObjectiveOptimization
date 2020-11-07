@@ -57,9 +57,9 @@ class TENCENT(data.Dataset):
     def __getitem__(self, index):
         img_path = self.files[self.split][index]
         label_h = self.labels[self.split][index][0]
-        label_c = self.labels[self.split][index][0]
-        label_f = self.labels[self.split][index][0]
-        label_o = self.labels[self.split][index][0]
+        label_c = self.labels[self.split][index][1]
+        label_f = self.labels[self.split][index][2]
+        label_o = self.labels[self.split][index][3]
         # print(self.root + '/original_images/' + img_path)
         img = m.imread(self.root + '/original_images/' + img_path)
         # matplotlib.pyplot.imread
@@ -73,8 +73,20 @@ class TENCENT(data.Dataset):
 
 
     def transform_img(self, img):
-        img = img.transpose(2, 0, 1)
+        # get height
+        h = img.shape[0]
+        # get width
+        w = img.shape[1]
+        print(img.shape[0])
+        print(img.shape[1])
+        if h > w :
+            img = img.transpose(2, 1, 0)
+
+        else :
+            img = img.transpose(2, 0, 1)
+        
         img = torch.from_numpy(img).float()
+
         return img
 
 
