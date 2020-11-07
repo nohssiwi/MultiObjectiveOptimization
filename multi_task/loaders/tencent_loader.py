@@ -77,8 +77,8 @@ class TENCENT(data.Dataset):
         h = img.shape[0]
         # get width
         w = img.shape[1]
-        print(img.shape[0])
-        print(img.shape[1])
+        # print(img.shape[0])
+        # print(img.shape[1])
         if h > w :
             img = img.transpose(2, 1, 0)
 
