@@ -103,7 +103,7 @@ class TENCENT(data.Dataset):
             # print(p1)
             # print(p2)
             img = np.pad(img, ((0, 0), (0, 0), (p1, p2)), 'constant', constant_values = (0,0))
-        print(img.shape)
+        # print(img.shape)
         img = torch.from_numpy(img).float()
 
         return img
