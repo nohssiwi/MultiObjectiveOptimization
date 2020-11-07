@@ -86,6 +86,14 @@ class TENCENT(data.Dataset):
             img = img.transpose(2, 0, 1)
         # print(img.shape)
 
+        if img.shape[1] < 1080 :
+            padding = (1080 - img.shape[1]) / 2
+            p1 = int(padding)
+            p2 = 1080 - p1 - img.shape[1]
+            # print(p1)
+            # print(p2)
+            img = np.pad(img, ((0, 0), (p1, p2), (0, 0)), 'constant', constant_values = (0,0))
+
         if img.shape[2] < 2340 :
             padding = (2340 - img.shape[2]) / 2
             p1 = int(padding)
@@ -93,7 +101,7 @@ class TENCENT(data.Dataset):
             # print(p1)
             # print(p2)
             img = np.pad(img, ((0, 0), (0, 0), (p1, p2)), 'constant', constant_values = (0,0))
-        # print(img.shape)
+        print(img.shape)
         img = torch.from_numpy(img).float()
 
         return img
