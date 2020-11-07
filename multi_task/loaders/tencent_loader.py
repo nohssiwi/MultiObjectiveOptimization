@@ -73,6 +73,7 @@ class TENCENT(data.Dataset):
 
 
     def transform_img(self, img):
+        img = img.transpose(2, 0, 1)
         img = torch.from_numpy(img).float()
         return img
 
