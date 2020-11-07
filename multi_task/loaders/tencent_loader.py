@@ -85,19 +85,21 @@ class TENCENT(data.Dataset):
         else :
             img = img.transpose(2, 0, 1)
         # print(img.shape)
+        max_h = 1125
+        max_w = 2436
 
-        if img.shape[1] < 1080 :
-            padding = (1080 - img.shape[1]) / 2
+        if img.shape[1] < max_h :
+            padding = (max_h - img.shape[1]) / 2
             p1 = int(padding)
-            p2 = 1080 - p1 - img.shape[1]
+            p2 = max_h - p1 - img.shape[1]
             # print(p1)
             # print(p2)
             img = np.pad(img, ((0, 0), (p1, p2), (0, 0)), 'constant', constant_values = (0,0))
 
-        if img.shape[2] < 2340 :
-            padding = (2340 - img.shape[2]) / 2
+        if img.shape[2] < max_w :
+            padding = (max_w - img.shape[2]) / 2
             p1 = int(padding)
-            p2 = 2340 - p1 - img.shape[2]
+            p2 = max_w - p1 - img.shape[2]
             # print(p1)
             # print(p2)
             img = np.pad(img, ((0, 0), (0, 0), (p1, p2)), 'constant', constant_values = (0,0))
