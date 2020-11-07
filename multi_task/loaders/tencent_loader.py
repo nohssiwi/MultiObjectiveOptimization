@@ -3,6 +3,7 @@ import glob
 import csv
 import scipy.misc as m
 import numpy as np
+import torchvision.transforms as transforms
 
 from torch.utils import data
 
@@ -81,10 +82,18 @@ class TENCENT(data.Dataset):
         # print(img.shape[1])
         if h > w :
             img = img.transpose(2, 1, 0)
-
         else :
             img = img.transpose(2, 0, 1)
-        
+        # print(img.shape)
+
+        if img.shape[2] < 2340 :
+            padding = (2340 - img.shape[2]) / 2
+            p1 = int(padding)
+            p2 = 2340 - p1 - img.shape[2]
+            # print(p1)
+            # print(p2)
+            img = np.pad(img, ((0, 0), (0, 0), (p1, p2)), 'constant', constant_values = (0,0))
+        # print(img.shape)
         img = torch.from_numpy(img).float()
 
         return img
