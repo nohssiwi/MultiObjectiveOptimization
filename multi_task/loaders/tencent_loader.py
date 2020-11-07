@@ -74,6 +74,7 @@ class TENCENT(data.Dataset):
 
 
     def transform_img(self, img):
+        img = img[:,:,:3]
         # get height
         h = img.shape[0]
         # get width
