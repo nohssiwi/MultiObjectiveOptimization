@@ -84,15 +84,14 @@ class ResNet(nn.Module):
         out = self.layer3(out)
         out = self.layer4(out)
         out = F.avg_pool2d(out, 4)
-        out = out.view(out.size(0), -1)
+        # out = out.view(out.size(0), -1)
         #out = self.linear(out)
         return out, mask
 
 
 class TencentDecoder(nn.Module):
-    def __init__(self, num_class=4, fc_dim=2048, pool_scales=(1, 2, 3, 6), task_type='C'):
+    def __init__(self, num_class=4, fc_dim=512, pool_scales=(2, 3, 4, 6), task_type='C'):
         super(TencentDecoder, self).__init__()
-
         self.task_type = task_type
 
         self.ppm = []
@@ -114,8 +113,8 @@ class TencentDecoder(nn.Module):
         )
 
     def forward(self, conv_out, mask):
-        conv5 = conv_out[-1]
-
+        # conv5 = conv_out[-1]
+        conv5 = conv_out
         input_size = conv5.size()
         ppm_out = [conv5]
         for pool_scale in self.ppm:

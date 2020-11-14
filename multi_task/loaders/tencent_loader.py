@@ -111,7 +111,7 @@ class TENCENT(data.Dataset):
         # Resize scales images from 0 to 255, thus we need to divide by 255.0
         # img = img.astype(float) / 255.0
         img = torch.from_numpy(img).float()
-        print(img.shape)
+        # print(img.shape)
         return img
 
 
