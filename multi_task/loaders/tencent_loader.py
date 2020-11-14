@@ -104,8 +104,10 @@ class TENCENT(data.Dataset):
             # print(p1)
             # print(p2)
             img = np.pad(img, ((0, 0), (0, 0), (p1, p2)), 'constant', constant_values = (0,0))
+        img = img.transpose(1, 2, 0)
         # img -= self.mean
         img = m.imresize(img, (256, 554))
+        img = img.transpose(2, 0, 1)
         # Resize scales images from 0 to 255, thus we need to divide by 255.0
         # img = img.astype(float) / 255.0
         img = torch.from_numpy(img).float()
