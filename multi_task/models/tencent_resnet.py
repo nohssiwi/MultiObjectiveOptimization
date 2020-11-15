@@ -108,60 +108,25 @@ class ResNet(nn.Module):
         out = self.layer4(out)
         out = F.avg_pool2d(out, 4)
         # out = out.view(out.size(0), -1)
-        #out = self.linear(out)
+        # out = self.linear(out)
         out = self.spatial_pyramid_pool(out, 2, [int(out.size(2)), int(out.size(3))], [4,2,1])
+        print("encoder", out.size())
         return out, mask
 
 
 class TencentDecoder(nn.Module):
-    def __init__(self, num_class=4, fc_dim=512, pool_scales=(2, 3, 4, 6), task_type='C'):
+    def __init__(self):
         super(TencentDecoder, self).__init__()
-        # self.task_type = task_type
-
-        # self.ppm = []
-        # for scale in pool_scales:
-        #     self.ppm.append(nn.Sequential(
-        #         nn.AdaptiveAvgPool2d(scale),
-        #         nn.Conv2d(fc_dim, 512, kernel_size=1, bias=False),
-        #         nn.BatchNorm2d(512),
-        #         nn.ReLU(inplace=True)
-        #     ))
-        # self.ppm = nn.ModuleList(self.ppm)
-
-        # self.conv_last = nn.Sequential(
-        #     nn.Conv2d(fc_dim+len(pool_scales)*512, 512,
-        #               kernel_size=3, padding=1, bias=False),
-        #     nn.BatchNorm2d(512),
-        #     nn.ReLU(inplace=True),
-        #     nn.Conv2d(512, num_class, kernel_size=1)
-        # )
         self.fc1 = nn.Linear(10752,4096)
         self.fc2 = nn.Linear(4096,5)
         self.s = nn.Softmax()
 
 
     def forward(self, conv_out, mask):
-        # conv5 = conv_out[-1]
-        # conv5 = conv_out
-        # input_size = conv5.size()
-        # ppm_out = [conv5]
-        # for pool_scale in self.ppm:
-        #     ppm_out.append(nn.functional.upsample(
-        #         pool_scale(conv5),
-        #         (input_size[2], input_size[3]),
-        #         mode='bilinear'))
-        # ppm_out = torch.cat(ppm_out, 1)
-
-        # x = self.conv_last(ppm_out)
-        # if self.task_type == 'C':
-        #     x = nn.functional.log_softmax(x, dim=1)
-        x = self.fc1(x)
+        x = self.fc1(conv_out)
         x = self.fc2(x)
         x = self.s(x)
-        print(x.size())
-        # x = F.log_softmax(x, dim=1)
         x = x.view(-1, 5, 1)
-        print(x.size())
         return x, mask
 
 
