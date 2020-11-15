@@ -41,14 +41,26 @@ class TENCENT(data.Dataset):
                 reader = csv.reader(f)
                 header = next(reader)
                 for row in reader :
+                    dis = self.distribution(row[2:22])
+                    dis = dis.reshape(-1, 1)
                     if row[1] in label_map:
-                        label_map[row[1]].append(torch.tensor(float(row[22])))
+                        # label_map[row[1]].append(torch.tensor(float(row[22])))
+                        label_map[row[1]].append(torch.tensor(dis))
                     else:
-                        label_map[row[1]] = [torch.tensor(float(row[22]))]
+                        # label_map[row[1]] = [torch.tensor(float(row[22]))]
+                        label_map[row[1]] = [torch.tensor(dis)]
 
         self.labels[self.split] = [label_map[x] for x in label_map]
         # print(self.labels[self.split])
         # print(self.files[self.split])
+
+    def distribution(self, row):
+        dis = np.zeros(5)
+        for v in row :
+            v = int(v)
+            dis[v-1] = dis[v-1] + 1
+        dis = dis / 20
+        return dis
 
 
     def __len__(self):
