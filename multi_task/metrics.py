@@ -18,6 +18,9 @@ class RunningMetric(object):
             self.num_updates = 0.0
             self._n_classes = n_classes
             self.confusion_matrix = np.zeros((n_classes, n_classes))
+        if metric_type == 'MSE':
+            self.sum = 0.0
+            self.num = 0.0
 
     def reset(self):
         if self._metric_type == 'ACC':
@@ -29,6 +32,9 @@ class RunningMetric(object):
         if self._metric_type == 'IOU':
             self.num_updates = 0.0
             self.confusion_matrix = np.zeros((self._n_classes, self._n_classes))
+        if self._metric_type == 'MSE' :
+            self.sum = 0.0
+            self.num = 0.0
 
     def _fast_hist(self, pred, gt):
         mask = (gt >= 0) & (gt < self._n_classes)
@@ -58,6 +64,9 @@ class RunningMetric(object):
             _gt = gt.data.cpu().numpy()
             for lt, lp in zip(_pred, _gt):
                 self.confusion_matrix += self._fast_hist(lt.flatten(), lp.flatten())
+        if self._metric_type == 'MSE' :
+            self.sum += np.sum(np.power((gt.reshape(-1, 1) - pred.reshape(-1, 1)), 2))
+            self.num += pred.shape[0]
         
     def get_result(self):
         if self._metric_type == 'ACC':
@@ -71,6 +80,9 @@ class RunningMetric(object):
             iou = np.diag(self.confusion_matrix) / (self.confusion_matrix.sum(axis=1) + self.confusion_matrix.sum(axis=0) - np.diag(self.confusion_matrix)) 
             mean_iou = np.nanmean(iou)
             return {'micro_acc': acc, 'macro_acc':acc_cls, 'mIOU': mean_iou}
+        if self._metric_type == 'MSE' :
+            return = {'mse': self.sum / self.num}
+
 
 
 def get_metrics(params):
@@ -90,5 +102,5 @@ def get_metrics(params):
             met[t] = RunningMetric(metric_type = 'ACC')
     if 'tencent' in params['dataset']:
         for t in params['tasks']:
-            met[t] = RunningMetric(metric_type = 'ACC')
+            met[t] = RunningMetric(metric_type = 'MSE')
     return met

@@ -107,18 +107,15 @@ class ResNet(nn.Module):
         out = self.layer3(out)
         out = self.layer4(out)
         out = F.avg_pool2d(out, 4)
-        # out = out.view(out.size(0), -1)
-        # out = self.linear(out)
-        out = self.spatial_pyramid_pool(out, 2, [int(out.size(2)), int(out.size(3))], [4,2,1])
-        print("encoder", out.size())
+        out = self.spatial_pyramid_pool(out, out.size(0), [int(out.size(2)), int(out.size(3))], [4,2,1])
         return out, mask
 
 
 class TencentDecoder(nn.Module):
     def __init__(self):
         super(TencentDecoder, self).__init__()
-        self.fc1 = nn.Linear(10752,4096)
-        self.fc2 = nn.Linear(4096,5)
+        self.fc1 = nn.Linear(10752, 4096)
+        self.fc2 = nn.Linear(4096, 5)
         self.s = nn.Softmax()
 
 
