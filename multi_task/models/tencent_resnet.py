@@ -112,7 +112,6 @@ class TencentDecoder(nn.Module):
         #     nn.ReLU(inplace=True),
         #     nn.Conv2d(512, num_class, kernel_size=1)
         # )
-        self.num_class = num_class
         self.fc1 = nn.Linear(10752,4096)
         self.fc2 = nn.Linear(4096,5)
         self.s = nn.Softmax()
@@ -139,7 +138,7 @@ class TencentDecoder(nn.Module):
         x = self.s(x)
         print(x.size())
         # x = F.log_softmax(x, dim=1)
-        x = x.view(self.num_class, 5, 1)
+        x = x.view(-1, 5, 1)
         print(x.size())
         return x, mask
 
