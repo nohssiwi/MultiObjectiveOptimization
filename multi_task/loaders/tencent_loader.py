@@ -51,8 +51,6 @@ class TENCENT(data.Dataset):
                         label_map[row[1]] = [torch.tensor(dis)]
 
         self.labels[self.split] = [label_map[x] for x in label_map]
-        # print(self.labels[self.split])
-        # print(self.files[self.split])
 
     def distribution(self, row):
         dis = np.zeros(5)
@@ -64,7 +62,6 @@ class TENCENT(data.Dataset):
 
 
     def __len__(self):
-        # print(self.files[self.split])
         return len(self.files[self.split])
 
     def __getitem__(self, index):
@@ -91,13 +88,10 @@ class TENCENT(data.Dataset):
         h = img.shape[0]
         # get width
         w = img.shape[1]
-        # print(img.shape[0])
-        # print(img.shape[1])
         if h > w :
             img = img.transpose(2, 1, 0)
         else :
             img = img.transpose(2, 0, 1)
-        # print(img.shape)
         max_h = 1125
         max_w = 2436
 
@@ -105,16 +99,12 @@ class TENCENT(data.Dataset):
             padding = (max_h - img.shape[1]) / 2
             p1 = int(padding)
             p2 = max_h - p1 - img.shape[1]
-            # print(p1)
-            # print(p2)
             img = np.pad(img, ((0, 0), (p1, p2), (0, 0)), 'constant', constant_values = (0,0))
 
         if img.shape[2] < max_w :
             padding = (max_w - img.shape[2]) / 2
             p1 = int(padding)
             p2 = max_w - p1 - img.shape[2]
-            # print(p1)
-            # print(p2)
             img = np.pad(img, ((0, 0), (0, 0), (p1, p2)), 'constant', constant_values = (0,0))
         img = img.transpose(1, 2, 0)
         # img -= self.mean
@@ -123,7 +113,6 @@ class TENCENT(data.Dataset):
         # Resize scales images from 0 to 255, thus we need to divide by 255.0
         # img = img.astype(float) / 255.0
         img = torch.from_numpy(img).float()
-        # print(img.shape)
         return img
 
 

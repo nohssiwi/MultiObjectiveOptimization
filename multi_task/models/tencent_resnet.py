@@ -112,6 +112,7 @@ class TencentDecoder(nn.Module):
         #     nn.ReLU(inplace=True),
         #     nn.Conv2d(512, num_class, kernel_size=1)
         # )
+        self.num_class = num_class
         self.fc1 = nn.Linear(10752,4096)
         self.fc2 = nn.Linear(4096,5)
         self.s = nn.Softmax()
@@ -130,14 +131,16 @@ class TencentDecoder(nn.Module):
         # ppm_out = torch.cat(ppm_out, 1)
 
         # x = self.conv_last(ppm_out)
-        print(conv_out.size())
         x = self.spatial_pyramid_pool(conv_out, 2, [int(conv_out.size(2)),int(conv_out.size(3))], [4,2,1])
         # if self.task_type == 'C':
         #     x = nn.functional.log_softmax(x, dim=1)
         x = self.fc1(x)
         x = self.fc2(x)
         x = self.s(x)
+        print(x.size())
         # x = F.log_softmax(x, dim=1)
+        x = x.view(self.num_class, 5, 1)
+        print(x.size())
         return x, mask
 
 
@@ -150,20 +153,15 @@ class TencentDecoder(nn.Module):
         
         returns: a tensor vector with shape [1 x n] is the concentration of multi-level pooling
         '''    
-        print(previous_conv.size())
         for i in range(len(out_pool_size)):
-            # print(previous_conv_size)
             h_wid = int(math.ceil(previous_conv_size[0] / out_pool_size[i]))
             w_wid = int(math.ceil(previous_conv_size[1] / out_pool_size[i]))
             h_pad = int(math.floor((h_wid*out_pool_size[i] - previous_conv_size[0] + 1)/2))
             w_pad = int(math.floor((w_wid*out_pool_size[i] - previous_conv_size[1] + 1)/2))
-            print(h_wid, w_wid, h_pad, w_pad)
             maxpool = nn.MaxPool2d((h_wid, w_wid), stride=(h_wid, w_wid), padding=(h_pad, w_pad))
             x = maxpool(previous_conv)
             if(i == 0):
                 spp = x.view(num_sample,-1)
-                # print("spp size:",spp.size())
             else:
-                # print("size:",spp.size())
                 spp = torch.cat((spp,x.view(num_sample,-1)), 1)
         return spp
