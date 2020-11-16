@@ -65,7 +65,7 @@ class RunningMetric(object):
             for lt, lp in zip(_pred, _gt):
                 self.confusion_matrix += self._fast_hist(lt.flatten(), lp.flatten())
         if self._metric_type == 'MSE' :
-            self.sum += np.sum(np.power((gt.reshape(-1, 1) - pred.reshape(-1, 1)), 2))
+            self.sum += np.sum(np.power((gt.data.cpu().numpy().reshape(-1, 1) - pred.data.cpu().numpy().reshape(-1, 1)), 2))
             self.num += pred.shape[0]
         
     def get_result(self):
@@ -81,7 +81,7 @@ class RunningMetric(object):
             mean_iou = np.nanmean(iou)
             return {'micro_acc': acc, 'macro_acc':acc_cls, 'mIOU': mean_iou}
         if self._metric_type == 'MSE' :
-            return = {'mse': self.sum / self.num}
+            return {'mse': self.sum / self.num}
 
 
 

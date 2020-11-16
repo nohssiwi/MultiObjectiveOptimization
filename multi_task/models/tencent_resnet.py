@@ -116,7 +116,7 @@ class TencentDecoder(nn.Module):
         super(TencentDecoder, self).__init__()
         self.fc1 = nn.Linear(10752, 4096)
         self.fc2 = nn.Linear(4096, 5)
-        self.s = nn.Softmax()
+        self.s = nn.Softmax(dim=1)
 
 
     def forward(self, conv_out, mask):
