@@ -14,43 +14,60 @@ class TENCENT(data.Dataset):
         self.split = split
         self.is_transform = is_transform
         self.augmentations = augmentations
-        self.files = {}
-        self.labels = {}
+        self.files = {
+            'train' : [],
+            'val' : []
+        }
+        self.labels = {
+            'train' : [],
+            'val' : []
+        }
 
-        self.all_files = glob.iglob(root + '/original_images/**/*.png', recursive=True)
-        #
-        # for f in self.all_files:
-        #     print(f)
-
-        # print(self.all_files)
-        self.files[self.split] = list(map(lambda x: x.split('/')[-2] + '/' + x.split('/')[-1], self.all_files))
-        # self.files[self.split] = self.all_files
-        # print(self.files[self.split])
-
-        # self.score_color_harmony_file = root + '/subjective_scores_v2/score_color_harmony.csv'
-        # self.score_colorfullness_file = root + '/subjective_scores_v2/score_colorfullness.csv'
-        # self.score_fitness_file = root + '/subjective_scores_v2/score_fitness.csv'
-        # self.score_overall_file = root + '/subjective_scores_v2/score_overall.csv'
-
-        self.all_scores_files = glob.glob(root + '/subjective_scores_v2/*.csv')
-        # print(self.all_scores_files)
-
-        label_map = {}
-        for file in self.all_scores_files:
+        dataset = {}
+        all_scores_files = glob.glob(root + '/subjective_scores_v2/*.csv')
+        for file in all_scores_files:
+            # print(file)
+            dimension = file.split('/')[-1].split('_')[1].split('.')[0]
+            # print(dimension)
+            key = ''
+            if dimension == 'overall' :
+                key = 'o'
+            elif dimension == 'color' :
+                key = 'h'
+            elif dimension == 'colorfulness' :
+                key = 'c'
+            elif dimension == 'fineness' :
+                key = 'f'
             with open(file, 'r') as f:
                 reader = csv.reader(f)
                 header = next(reader)
                 for row in reader :
                     dis = self.distribution(row[2:22])
                     dis = dis.reshape(-1, 1)
-                    if row[1] in label_map:
-                        # label_map[row[1]].append(torch.tensor(float(row[22])))
-                        label_map[row[1]].append(torch.tensor(dis))
+                    filename =  row[1].split('_')[-3] + '/' + row[1].split('_')[-2] + '_' + row[1].split('_')[-1]
+                    if row[1] in dataset:
+                        dataset[row[1]]['labels'][key] = torch.tensor(dis)
                     else:
-                        # label_map[row[1]] = [torch.tensor(float(row[22]))]
-                        label_map[row[1]] = [torch.tensor(dis)]
+                        dataset[row[1]] = {
+                            'filename' : filename,
+                            'labels' : {key : torch.tensor(dis)}
+                        }
+        dataset = [dataset[x] for x in dataset]
+        # print(dataset)
 
-        self.labels[self.split] = [label_map[x] for x in label_map]
+        # divide dataset
+        # total: 1091 train: 872 val: 219
+        for i in range(0, 872):
+            self.files['train'].append(dataset[i]['filename'])
+            self.labels['train'].append(dataset[i]['labels'])
+        for i in range(872, 1091):
+            self.files['val'].append(dataset[i]['filename'])
+            self.labels['val'].append(dataset[i]['labels'])
+
+        # print(self.files['train'])
+        # print(self.files['val'])
+        # print(len(self.labels['train']))
+        # print(self.labels['val'])
 
     def distribution(self, row):
         dis = np.zeros(5)
@@ -66,10 +83,10 @@ class TENCENT(data.Dataset):
 
     def __getitem__(self, index):
         img_path = self.files[self.split][index]
-        label_h = self.labels[self.split][index][0]
-        label_c = self.labels[self.split][index][1]
-        label_f = self.labels[self.split][index][2]
-        label_o = self.labels[self.split][index][3]
+        label_h = self.labels[self.split][index]['h']
+        label_c = self.labels[self.split][index]['c']
+        label_f = self.labels[self.split][index]['f']
+        label_o = self.labels[self.split][index]['o']
         # print(self.root + '/original_images/' + img_path)
         img = m.imread(self.root + '/original_images/' + img_path)
         # matplotlib.pyplot.imread
@@ -129,7 +146,7 @@ if __name__ == '__main__':
     
     local_path = '../../Qomex_2020_mobile_game_imges'
     tencent = TENCENT(local_path, is_transform=True, augmentations=None)
-    print(tencent[0])
+    # print(tencent[0])
     trainloader = data.DataLoader(tencent, batch_size=4, num_workers=0)
     # print(trainloader)
 
