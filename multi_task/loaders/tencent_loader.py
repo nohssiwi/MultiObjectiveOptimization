@@ -109,8 +109,8 @@ class TENCENT(data.Dataset):
         #     img = img.transpose(2, 1, 0)
         # else :
         #     img = img.transpose(2, 0, 1)
-        max_h = 1125
-        max_w = 2436
+        # max_h = 1125
+        # max_w = 2436
 
         # if img.shape[1] < max_h :
         #     padding = (max_h - img.shape[1]) / 2

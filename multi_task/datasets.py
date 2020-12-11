@@ -15,6 +15,11 @@ def global_transformer():
     return transforms.Compose([transforms.ToTensor(),
                                transforms.Normalize((0.1307,), (0.3081,))])
 
+def my_collate(batch):
+    data = [item[0] for item in batch]
+    target = [item[1] for item in batch]
+    target = torch.LongTensor(target)
+    return [data, target]
 
 def get_dataset(params, configs):
     if 'dataset' not in params:
@@ -48,6 +53,6 @@ def get_dataset(params, configs):
         train_dst = TENCENT(root=configs['tencent']['path'], is_transform=True, split='train', img_size=(configs['tencent']['img_rows'], configs['tencent']['img_cols']), augmentations=None)
         val_dst = TENCENT(root=configs['tencent']['path'], is_transform=True, split='val', img_size=(configs['tencent']['img_rows'], configs['tencent']['img_cols']), augmentations=None)
 
-        train_loader = torch.utils.data.DataLoader(train_dst, batch_size=params['batch_size'], shuffle=True, num_workers=4)
-        val_loader = torch.utils.data.DataLoader(val_dst, batch_size=params['batch_size'], num_workers=4)
+        train_loader = torch.utils.data.DataLoader(train_dst, batch_size=params['batch_size'], shuffle=True, num_workers=4, collate_fn=my_collate)
+        val_loader = torch.utils.data.DataLoader(val_dst, batch_size=params['batch_size'], num_workers=4, collate_fn=my_collate)
         return train_loader, train_dst, val_loader, val_dst
