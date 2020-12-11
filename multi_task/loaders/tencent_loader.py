@@ -125,7 +125,7 @@ class TENCENT(data.Dataset):
         #     img = np.pad(img, ((0, 0), (0, 0), (p1, p2)), 'constant', constant_values = (0,0))
         # img = img.transpose(1, 2, 0)
         # img -= self.mean
-        img = m.imresize(img, (h / 5, w / 5)))
+        img = m.imresize(img, (int(h / 5), int(w / 5)))
         # img = img.transpose(2, 0, 1)
         # Resize scales images from 0 to 255, thus we need to divide by 255.0
         # img = img.astype(float) / 255.0
