@@ -89,17 +89,31 @@ def train_multi_task(param_file):
 
         for batch in train_loader:
             n_iter += 1
-            # First member is always images
-            images = batch[0]
-            images = Variable(images.cuda())
+            if params['dataset'] = 'tencent' :
+                # First member is always images
+                images = batch[0][0]
+                images = Variable(images.cuda())
 
-            labels = {}
-            # Read all targets of all tasks
-            for i, t in enumerate(all_tasks):
-                if t not in tasks:
-                    continue
-                labels[t] = batch[i+1]
-                labels[t] = Variable(labels[t].cuda())
+                labels = {}
+                # Read all targets of all tasks
+                for i, t in enumerate(all_tasks):
+                    if t not in tasks:
+                        continue
+                    labels[t] = batch[i+1][0]
+                    labels[t] = Variable(labels[t].cuda())
+                
+            else :
+                # First member is always images
+                images = batch[0]
+                images = Variable(images.cuda())
+
+                labels = {}
+                # Read all targets of all tasks
+                for i, t in enumerate(all_tasks):
+                    if t not in tasks:
+                        continue
+                    labels[t] = batch[i+1]
+                    labels[t] = Variable(labels[t].cuda())
 
             # Scaling the loss functions based on the algorithm choice
             loss_data = {}
