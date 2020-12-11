@@ -17,9 +17,12 @@ def global_transformer():
 
 def my_collate(batch):
     data = [item[0] for item in batch]
-    target = [item[1] for item in batch]
-    target = torch.LongTensor(target)
-    return [data, target]
+    h = [item[1] for item in batch]
+    c = [item[1] for item in batch]
+    f = [item[1] for item in batch]
+    o = [item[1] for item in batch]
+    # target = torch.LongTensor(target)
+    return [data, h, c, f, o]
 
 def get_dataset(params, configs):
     if 'dataset' not in params:
