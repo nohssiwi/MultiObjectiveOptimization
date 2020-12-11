@@ -1,7 +1,7 @@
 {
     "optimizer": "SGD",
-    "batch_size": 2,
-    "lr": 0.0005,
+    "batch_size": 1,
+    "lr": 0.01,
     "dataset": "tencent",
     "tasks": ["H", "C", "F", "O"],
     "normalization_type": "loss",
