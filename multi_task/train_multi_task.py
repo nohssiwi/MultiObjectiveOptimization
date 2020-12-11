@@ -89,7 +89,7 @@ def train_multi_task(param_file):
 
         for batch in train_loader:
             n_iter += 1
-            if params['dataset'] = 'tencent' :
+            if params['dataset'] == 'tencent' :
                 # First member is always images
                 images = batch[0][0]
                 images = Variable(images.cuda())
