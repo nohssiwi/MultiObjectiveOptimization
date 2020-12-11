@@ -105,28 +105,28 @@ class TENCENT(data.Dataset):
         h = img.shape[0]
         # get width
         w = img.shape[1]
-        if h > w :
-            img = img.transpose(2, 1, 0)
-        else :
-            img = img.transpose(2, 0, 1)
+        # if h > w :
+        #     img = img.transpose(2, 1, 0)
+        # else :
+        #     img = img.transpose(2, 0, 1)
         max_h = 1125
         max_w = 2436
 
-        if img.shape[1] < max_h :
-            padding = (max_h - img.shape[1]) / 2
-            p1 = int(padding)
-            p2 = max_h - p1 - img.shape[1]
-            img = np.pad(img, ((0, 0), (p1, p2), (0, 0)), 'constant', constant_values = (0,0))
-
-        if img.shape[2] < max_w :
-            padding = (max_w - img.shape[2]) / 2
-            p1 = int(padding)
-            p2 = max_w - p1 - img.shape[2]
-            img = np.pad(img, ((0, 0), (0, 0), (p1, p2)), 'constant', constant_values = (0,0))
-        img = img.transpose(1, 2, 0)
+        # if img.shape[1] < max_h :
+        #     padding = (max_h - img.shape[1]) / 2
+        #     p1 = int(padding)
+        #     p2 = max_h - p1 - img.shape[1]
+        #     img = np.pad(img, ((0, 0), (p1, p2), (0, 0)), 'constant', constant_values = (0,0))
+        #
+        # if img.shape[2] < max_w :
+        #     padding = (max_w - img.shape[2]) / 2
+        #     p1 = int(padding)
+        #     p2 = max_w - p1 - img.shape[2]
+        #     img = np.pad(img, ((0, 0), (0, 0), (p1, p2)), 'constant', constant_values = (0,0))
+        # img = img.transpose(1, 2, 0)
         # img -= self.mean
-        img = m.imresize(img, (256, 554))
-        img = img.transpose(2, 0, 1)
+        img = m.imresize(img, (h / 5, w / 5))
+        # img = img.transpose(2, 0, 1)
         # Resize scales images from 0 to 255, thus we need to divide by 255.0
         # img = img.astype(float) / 255.0
         img = torch.from_numpy(img).float()
