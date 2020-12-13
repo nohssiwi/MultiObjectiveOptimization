@@ -88,10 +88,11 @@ class ResNet(nn.Module):
         returns: a tensor vector with shape [1 x n] is the concentration of multi-level pooling
         '''    
         for i in range(len(out_pool_size)):
-            h_wid = int(math.ceil(previous_conv_size[0] / out_pool_size[i]))
-            w_wid = int(math.ceil(previous_conv_size[1] / out_pool_size[i]))
-            h_pad = int(math.floor((h_wid*out_pool_size[i] - previous_conv_size[0] + 1)/2))
-            w_pad = int(math.floor((w_wid*out_pool_size[i] - previous_conv_size[1] + 1)/2))
+            h_wid = math.ceil(previous_conv_size[0] / out_pool_size[i])
+            w_wid = math.ceil(previous_conv_size[1] / out_pool_size[i])
+            h_pad = math.floor((h_wid*out_pool_size[i] - previous_conv_size[0] + 1)/2)
+            w_pad = math.floor((w_wid*out_pool_size[i] - previous_conv_size[1] + 1)/2)
+            # torch.nn.functional.pad
             maxpool = nn.MaxPool2d((h_wid, w_wid), stride=(h_wid, w_wid), padding=(h_pad, w_pad))
             x = maxpool(previous_conv)
             if(i == 0):
@@ -107,15 +108,16 @@ class ResNet(nn.Module):
         out = self.layer3(out)
         out = self.layer4(out)
         out = F.avg_pool2d(out, 4)
-        out = self.spatial_pyramid_pool(out, out.size(0), [int(out.size(2)), int(out.size(3))], [4,2,1])
+        out = self.spatial_pyramid_pool(out, out.size(0), [int(out.size(2)), int(out.size(3))], [3,2,1])
         return out, mask
 
 
 class TencentDecoder(nn.Module):
     def __init__(self):
         super(TencentDecoder, self).__init__()
-        self.fc1 = nn.Linear(10752, 4096)
-        self.fc2 = nn.Linear(4096, 5)
+        # self.fc1 = nn.Linear(10752, 4096)
+        self.fc1 = nn.Linear(7168, 1000)
+        self.fc2 = nn.Linear(1000, 5)
         self.s = nn.Softmax(dim=1)
 
 

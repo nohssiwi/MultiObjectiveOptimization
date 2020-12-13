@@ -44,7 +44,8 @@ class TENCENT(data.Dataset):
                 for row in reader :
                     dis = self.distribution(row[2:22])
                     dis = dis.reshape(-1, 1)
-                    filename =  row[1].split('_')[-3] + '/' + row[1].split('_')[-2] + '_' + row[1].split('_')[-1]
+                    index = row[1].find('img')
+                    filename = row[1][:index-1] + '/' + row[1][index:]
                     if row[1] in dataset:
                         dataset[row[1]]['labels'][key] = torch.tensor(dis)
                     else:
