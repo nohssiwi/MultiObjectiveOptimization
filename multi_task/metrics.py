@@ -21,6 +21,13 @@ class RunningMetric(object):
         if metric_type == 'MSE':
             self.sum = 0.0
             self.num = 0.0
+        if metric_type == 'SPCC':
+            self.rs = 0.0
+            self.num = 0.0
+        if self.metric_type == 'PCC':
+            self.rs = 0.0
+            self.num = 0.0
+
 
     def reset(self):
         if self._metric_type == 'ACC':
@@ -35,6 +42,13 @@ class RunningMetric(object):
         if self._metric_type == 'MSE' :
             self.sum = 0.0
             self.num = 0.0
+        if self.metric_type == 'SPCC':
+            self.rs = 0.0
+            self.num = 0.0
+        if self.metric_type == 'PCC':
+            self.rs = 0.0
+            self.num = 0.0
+
 
     def _fast_hist(self, pred, gt):
         mask = (gt >= 0) & (gt < self._n_classes)
@@ -67,6 +81,12 @@ class RunningMetric(object):
         if self._metric_type == 'MSE' :
             self.sum += np.sum(np.power((gt.data.cpu().numpy().reshape(-1, 1) - pred.data.cpu().numpy().reshape(-1, 1)), 2))
             self.num += pred.shape[0]
+
+        if self._metric_type == 'SPCC' :
+            self.rs += (gt.data.cpu().numpy().reshape(-1, 1)).corr((pred.data.cpu().numpy().reshape(-1, 1)), method='spearman')
+
+        if self._metric_type == 'PCC' :
+            self.rs += (gt.data.cpu().numpy().reshape(-1, 1)).corr((pred.data.cpu().numpy().reshape(-1, 1)), method='pearson')
         
     def get_result(self):
         if self._metric_type == 'ACC':
@@ -82,6 +102,10 @@ class RunningMetric(object):
             return {'micro_acc': acc, 'macro_acc':acc_cls, 'mIOU': mean_iou}
         if self._metric_type == 'MSE' :
             return {'mse': self.sum / self.num}
+        if self._metric_type == 'SPCC' :
+            return {'spcc': self.rs / self.num}
+        if self._metric_type == 'PCC' :
+            return {'spcc': self.rs / self.num}
 
 
 
