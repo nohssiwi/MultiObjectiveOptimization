@@ -57,6 +57,15 @@ class RunningMetric(object):
             pred[mask], minlength=self._n_classes**2).reshape(self._n_classes, self._n_classes)
         return hist
 
+    def rank_correlation(att_map, att_gd):
+        """
+        Function that measures Spearman’s correlation coefficient between target and output:
+        """
+        n = att_map.shape[1]
+        upper = 6 * np.sum(np.square(att_gd - att_map), axis=-1)
+        down = n * (np.square(n) - 1)
+        return np.mean(1 - (upper / down))
+
     def update(self, pred, gt):
         if self._metric_type == 'ACC':
             predictions = pred.data.max(1, keepdim=True)[1]
@@ -83,10 +92,14 @@ class RunningMetric(object):
             self.num += pred.shape[0]
 
         if self._metric_type == 'SPCC' :
-            self.rs += (gt.data.cpu().numpy().reshape(-1, 1)).corr((pred.data.cpu().numpy().reshape(-1, 1)), method='spearman')
+            # self.rs += (gt.data.cpu().numpy().reshape(-1, 1)).corr((pred.data.cpu().numpy().reshape(-1, 1)), method='spearman')
+            self.rs += self.rank_correlation((gt.data.cpu().numpy().reshape(-1, 1)), (pred.data.cpu().numpy().reshape(-1, 1)))
+            self.num += pred.shape[0]
 
         if self._metric_type == 'PCC' :
-            self.rs += (gt.data.cpu().numpy().reshape(-1, 1)).corr((pred.data.cpu().numpy().reshape(-1, 1)), method='pearson')
+            # self.rs += (gt.data.cpu().numpy().reshape(-1, 1)).corr((pred.data.cpu().numpy().reshape(-1, 1)), method='pearson')
+            self.rs += np.corrcoef((gt.data.cpu().numpy().reshape(-1, 1)), (pred.data.cpu().numpy().reshape(-1, 1)))
+            self.num += pred.shape[0]
         
     def get_result(self):
         if self._metric_type == 'ACC':
