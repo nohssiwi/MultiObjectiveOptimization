@@ -24,7 +24,7 @@ class RunningMetric(object):
         if metric_type == 'SPCC':
             self.rs = 0.0
             self.num = 0.0
-        if self.metric_type == 'PCC':
+        if metric_type == 'PCC':
             self.rs = 0.0
             self.num = 0.0
 
@@ -105,7 +105,7 @@ class RunningMetric(object):
         if self._metric_type == 'SPCC' :
             return {'spcc': self.rs / self.num}
         if self._metric_type == 'PCC' :
-            return {'spcc': self.rs / self.num}
+            return {'pcc': self.rs / self.num}
 
 
 

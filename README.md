@@ -32,6 +32,7 @@ The code base uses `configs.json` for the global configurations like dataset dir
 To train a model, use the command: 
 ```bash
 python multi_task/train_multi_task.py --param_file=./sample.json
+python multi_task/train_multi_task.py --param_file=./tencent.json
 ```
 
 # Contact

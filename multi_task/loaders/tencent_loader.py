@@ -137,39 +137,9 @@ class TENCENT(data.Dataset):
 
 
 if __name__ == '__main__':
-    import torchvision
-    import matplotlib.pyplot as plt
-    '''
-    2,160 x 1,080‬
-    ‪2,340 x 1,080‬
-    '''
-    bs = 4
     
     local_path = '../../Qomex_2020_mobile_game_imges'
     tencent = TENCENT(local_path, is_transform=True, augmentations=None)
     # print(tencent[0])
     trainloader = data.DataLoader(tencent, batch_size=4, num_workers=0)
     # print(trainloader)
-
-    # for i, data in enumerate(trainloader):
-    #     imgs = data[0]
-    #     labels = data[1:]
-    #     imgs = imgs.numpy()[:, ::-1, :, :]
-        
-    #     # imgs = np.transpose(imgs, [0,2,3,1])
-
-    #     f, axarr = plt.subplots(bs,4)
-    #     for j in range(bs):
-    #         axarr[j][0].imshow(imgs[j])
-    #         axarr[j][1].imshow(imgs[j])
-    #         axarr[j][2].imshow(imgs[j])
-    #         axarr[j][3].imshow(imgs[j])
-    #         # axarr[j][1].imshow(tencent.decode_segmap(labels.numpy()[j]))
-    #         # axarr[j][2].imshow(instances[j,0,:,:])
-    #         # axarr[j][3].imshow(instances[j,1,:,:])
-    #     plt.show()
-    #     a = input()
-    #     if a == 'ex':
-    #         break
-    #     else:
-    #         plt.close()
