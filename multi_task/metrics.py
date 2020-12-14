@@ -42,10 +42,10 @@ class RunningMetric(object):
         if self._metric_type == 'MSE' :
             self.sum = 0.0
             self.num = 0.0
-        if self.metric_type == 'SPCC':
+        if self._metric_type == 'SPCC':
             self.rs = 0.0
             self.num = 0.0
-        if self.metric_type == 'PCC':
+        if self._metric_type == 'PCC':
             self.rs = 0.0
             self.num = 0.0
 
