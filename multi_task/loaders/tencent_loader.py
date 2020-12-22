@@ -109,30 +109,59 @@ class TENCENT(data.Dataset):
 
 
     def transform_img(self, img):
-        print(img.shape)
-        # img = img[:,:,:3]
-        # get height
-        h = img.shape[0]
-        # get width
-        w = img.shape[1]
-        ratio = w/h
-        print(ratio)
-        if h > w :
-            img = img.transpose(2, 1, 0)
+        # get width and height of image
+        width = img.size[0]
+        height = img.size[1]
+        # ratio of width / height
+        ratio = width / height
+        if (width > height) :
+            transform = transforms.RandomCrop((200, 400))
         else :
-            img = img.transpose(2, 0, 1)
-        # max_h = 1125
-        # max_w = 2436
+            transform = transforms.RandomCrop((400, 200))
+        
+        # extract patches of image
         patches = []
-        # extract patches
-        transform = transforms.RandomCrop((200, 400))
-
         for i in range(0, self.patch_number) :       
             patch = transform(img)
-            patch = np.array(patch, dtype=np.uint8)
+            patch = np.array(patch, dtype = np.uint8)
             patches.append(patch)
         patches = np.array(patches)
+
+        # transpose to make sure width > height
+        if (width > height) :
+            patches = patches.transpose(0, 3, 1, 2)
+        else :
+            patches = patches.transpose(0, 3, 2, 1)
+        
+        # to tensor
         image = torch.from_numpy(patches).float()
+        
+        return image
+
+        # print(img.shape)
+        # img = img[:,:,:3]
+        # get height
+        # h = img.shape[0]
+        # # get width
+        # w = img.shape[1]
+        # ratio = w/h
+        # print(ratio)
+        # if h > w :
+        #     img = img.transpose(2, 1, 0)
+        # else :
+        #     img = img.transpose(2, 0, 1)
+        # # max_h = 1125
+        # # max_w = 2436
+        # patches = []
+        # # extract patches
+        # transform = transforms.RandomCrop((200, 400))
+
+        # for i in range(0, self.patch_number) :       
+        #     patch = transform(img)
+        #     patch = np.array(patch, dtype=np.uint8)
+        #     patches.append(patch)
+        # patches = np.array(patches)
+        # image = torch.from_numpy(patches).float()
         # if img.shape[1] < max_h :
         #     padding = (max_h - img.shape[1]) / 2
         #     p1 = int(padding)
