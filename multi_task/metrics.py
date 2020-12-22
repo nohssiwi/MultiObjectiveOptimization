@@ -116,7 +116,7 @@ class RunningMetric(object):
             self.rs += np.corrcoef((gt.data.cpu().numpy().reshape(1, -1)), (pred.data.cpu().numpy().reshape(1, -1)))
             self.num += pred.shape[0]
         if self._metric_type == 'ACC_DIS' :
-            self.accuracy += self.distrubution_accuracy((pred.data.cpu().numpy(), (gt.data.cpu().numpy()))
+            self.accuracy += self.distrubution_accuracy((pred.data.cpu().numpy(), (gt.data.cpu().numpy())))
             self.num += pred.shape[0]
 
         
