@@ -118,6 +118,7 @@ class RunningMetric(object):
         if self._metric_type == 'ACC_DIS' :
             self.accuracy += self.distrubution_accuracy((pred.data.cpu().numpy().reshape(1, -1))[0], (gt.data.cpu().numpy().reshape(1, -1)))
             self.num += pred.shape[0]
+
         
     def get_result(self):
         if self._metric_type == 'ACC':
