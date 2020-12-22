@@ -238,7 +238,7 @@ def train_multi_task(param_file):
             metric['ACC' + str(t)].reset()
         writer.add_scalar('validation_loss', tot_loss['all']/len(val_dst), n_iter)
 
-        if epoch % 3 == 0:
+        if epoch % 10 == 0:
             # Save after every 3 epoch
             state = {'epoch': epoch+1,
                     'model_rep': model['rep'].state_dict(),

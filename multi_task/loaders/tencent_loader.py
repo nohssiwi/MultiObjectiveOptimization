@@ -12,10 +12,10 @@ from torch.utils import data
 
 
 class TENCENT(data.Dataset):
-    def __init__(self, root, type, patch_size = 10):
+    def __init__(self, root, is_transform = True, type, patch_size = 10):
         self.root = root
         self.type = type
-        # self.is_transform = is_transform
+        self.is_transform = is_transform
         # self.augmentations = augmentations
         self.patch_size = patch_size
         self.files = {
@@ -95,7 +95,8 @@ class TENCENT(data.Dataset):
         # print(self.root + '/original_images/' + img_path)
         # img = m.imread(self.root + '/original_images/' + img_path)
         img = Image.open(self.root + '/original_images/' + img_path).convert('RGB')
-        img = self.transform_img(img)
+        if self.is_transform :
+            img = self.transform_img(img)
         
         
         # matplotlib.pyplot.imread
@@ -112,76 +113,31 @@ class TENCENT(data.Dataset):
         # get width and height of image
         width = img.size[0]
         height = img.size[1]
-        # ratio of width / height
-        ratio = width / height
-        if (width > height) :
-            transform = transforms.RandomCrop((200, 400))
-        else :
-            transform = transforms.RandomCrop((400, 200))
-        
+        # if (width > height) :
+        #     crop = transforms.RandomCrop((200, 400))
+        # else :
+        #     crop = transforms.RandomCrop((400, 200))
+        resize = transforms.Resize(454)
+        crop = transforms.RandomCrop(256)
+        img = img.resize(img)
         # extract patches of image
         patches = []
         for i in range(0, self.patch_size) :       
-            patch = transform(img)
+            patch = crop(img)
             patch = np.array(patch, dtype = np.uint8)
             patches.append(patch)
         patches = np.array(patches)
 
         # transpose to make sure width > height
-        if (width > height) :
-            patches = patches.transpose(0, 3, 1, 2)
-        else :
-            patches = patches.transpose(0, 3, 2, 1)
-        
+        # if (width > height) :
+        #     patches = patches.transpose(0, 3, 1, 2)
+        # else :
+        #     patches = patches.transpose(0, 3, 2, 1)
+        patches = patches.transpose(0, 3, 1, 2)
         # to tensor
         # image = torch.from_numpy(patches).float()
         
         return patches
-
-        # print(img.shape)
-        # img = img[:,:,:3]
-        # get height
-        # h = img.shape[0]
-        # # get width
-        # w = img.shape[1]
-        # ratio = w/h
-        # print(ratio)
-        # if h > w :
-        #     img = img.transpose(2, 1, 0)
-        # else :
-        #     img = img.transpose(2, 0, 1)
-        # # max_h = 1125
-        # # max_w = 2436
-        # patches = []
-        # # extract patches
-        # transform = transforms.RandomCrop((200, 400))
-
-        # for i in range(0, self.patch_size) :       
-        #     patch = transform(img)
-        #     patch = np.array(patch, dtype=np.uint8)
-        #     patches.append(patch)
-        # patches = np.array(patches)
-        # image = torch.from_numpy(patches).float()
-        # if img.shape[1] < max_h :
-        #     padding = (max_h - img.shape[1]) / 2
-        #     p1 = int(padding)
-        #     p2 = max_h - p1 - img.shape[1]
-        #     img = np.pad(img, ((0, 0), (p1, p2), (0, 0)), 'constant', constant_values = (0,0))
-        #
-        # if img.shape[2] < max_w :
-        #     padding = (max_w - img.shape[2]) / 2
-        #     p1 = int(padding)
-        #     p2 = max_w - p1 - img.shape[2]
-        #     img = np.pad(img, ((0, 0), (0, 0), (p1, p2)), 'constant', constant_values = (0,0))
-        # img = img.transpose(1, 2, 0)
-        # img -= self.mean
-        # img = m.imresize(img, (int(h / 5), int(w / 5)))
-        # img = img.transpose(2, 0, 1)
-        # Resize scales images from 0 to 255, thus we need to divide by 255.0
-        # img = img.astype(float) / 255.0
-        # return image
-
-
 
 
 if __name__ == '__main__':
