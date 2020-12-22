@@ -108,25 +108,56 @@ class ResNet(nn.Module):
         out = self.layer3(out)
         out = self.layer4(out)
         out = F.avg_pool2d(out, 4)
-        out = self.spatial_pyramid_pool(out, out.size(0), [int(out.size(2)), int(out.size(3))], [3,2,1])
+        # out = self.spatial_pyramid_pool(out, out.size(0), [int(out.size(2)), int(out.size(3))], [3,2,1])
+        out = out.view(out.size(0), -1)
         return out, mask
 
 
+# class TencentDecoder(nn.Module):
+#     def __init__(self):
+#         super(TencentDecoder, self).__init__()
+#         # self.fc1 = nn.Linear(10752, 4096)
+#         self.fc1 = nn.Linear(7168, 1000)
+#         self.fc2 = nn.Linear(1000, 5)
+#         self.s = nn.Softmax(dim=1)
+
+
+#     def forward(self, conv_out, mask):
+#         x = self.fc1(conv_out)
+#         x = self.fc2(x)
+#         x = self.s(x)
+#         x = x.view(-1, 5, 1)
+#         return x, mask
+
 class TencentDecoder(nn.Module):
-    def __init__(self):
+    def __init__(self, batch_size, patch_size):
         super(TencentDecoder, self).__init__()
-        # self.fc1 = nn.Linear(10752, 4096)
-        self.fc1 = nn.Linear(7168, 1000)
-        self.fc2 = nn.Linear(1000, 5)
+        self.batch_size = batch_size
+        self.patch_size = patch_size
+        self.fc = nn.Linear(36864, 5)
         self.s = nn.Softmax(dim=1)
+
+    def aggragate(self, patches) :
+        # aggragate patches
+        batch_size = self.batch_size
+        patch_size = self.patch_size
+        out = []
+        for i in range(0, batch_size) :
+            dis = x[i*patch_size]
+            for j in range(1, patch_size) :
+                dis = dis + x[i*patch_size+j]
+            dis = dis / patch_size
+            out.append(dis)
+        out = torch.stack(out)
+        return out
 
 
     def forward(self, conv_out, mask):
-        x = self.fc1(conv_out)
-        x = self.fc2(x)
-        x = self.s(x)
-        x = x.view(-1, 5, 1)
-        return x, mask
+        out = self.fc(conv_out)
+        out = self.s(out)
+        out = self.aggragate(out)
+        out = out.view(-1, 5, 1)
+        return out, mask
 
 
 

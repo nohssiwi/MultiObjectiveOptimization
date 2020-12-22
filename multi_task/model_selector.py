@@ -53,7 +53,7 @@ def get_model(params):
         model['rep'] = ResNet(BasicBlock, [2,2,2,2])
         model['rep'].cuda()
         for t in params['tasks']:
-            model[t] = TencentDecoder()
+            model[t] = TencentDecoder(params['batch_size'], params['patch_size'])
             model[t].cuda()
         return model
 

@@ -12,12 +12,12 @@ from torch.utils import data
 
 
 class TENCENT(data.Dataset):
-    def __init__(self, root, type, patch_number = 10):
+    def __init__(self, root, type, patch_size = 10):
         self.root = root
         self.type = type
         # self.is_transform = is_transform
         # self.augmentations = augmentations
-        self.patch_number = patch_number
+        self.patch_size = patch_size
         self.files = {
             'train' : [],
             'val' : []
@@ -121,7 +121,7 @@ class TENCENT(data.Dataset):
         
         # extract patches of image
         patches = []
-        for i in range(0, self.patch_number) :       
+        for i in range(0, self.patch_size) :       
             patch = transform(img)
             patch = np.array(patch, dtype = np.uint8)
             patches.append(patch)
@@ -136,7 +136,7 @@ class TENCENT(data.Dataset):
         # to tensor
         # image = torch.from_numpy(patches).float()
         
-        return image
+        return patches
 
         # print(img.shape)
         # img = img[:,:,:3]
@@ -156,7 +156,7 @@ class TENCENT(data.Dataset):
         # # extract patches
         # transform = transforms.RandomCrop((200, 400))
 
-        # for i in range(0, self.patch_number) :       
+        # for i in range(0, self.patch_size) :       
         #     patch = transform(img)
         #     patch = np.array(patch, dtype=np.uint8)
         #     patches.append(patch)
@@ -179,7 +179,7 @@ class TENCENT(data.Dataset):
         # img = img.transpose(2, 0, 1)
         # Resize scales images from 0 to 255, thus we need to divide by 255.0
         # img = img.astype(float) / 255.0
-        return image
+        # return image
 
 
 
