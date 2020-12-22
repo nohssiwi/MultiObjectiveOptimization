@@ -27,6 +27,9 @@ class RunningMetric(object):
         if metric_type == 'PCC':
             self.rs = 0.0
             self.num = 0.0
+        if metric_type == 'ACC_DIS':
+            self.accuracy = 0.0
+            self.num = 0.0
 
 
     def reset(self):
@@ -48,6 +51,9 @@ class RunningMetric(object):
         if self._metric_type == 'PCC':
             self.rs = 0.0
             self.num = 0.0
+        if self._metric_type == 'ACC_DIS':
+            self.accuracy = 0.0
+            self.num = 0.0
 
 
     def _fast_hist(self, pred, gt):
@@ -57,7 +63,7 @@ class RunningMetric(object):
             pred[mask], minlength=self._n_classes**2).reshape(self._n_classes, self._n_classes)
         return hist
 
-    def rank_correlation(att_map, att_gd):
+    def rank_correlation(self,att_map, att_gd):
         """
         Function that measures Spearman’s correlation coefficient between target and output:
         """
@@ -65,6 +71,15 @@ class RunningMetric(object):
         upper = 6 * np.sum(np.square(att_gd - att_map), axis=-1)
         down = n * (np.square(n) - 1)
         return np.mean(1 - (upper / down))
+
+    def distrubution_accuracy(self, pred, gd):
+        pred_score = np.average(pred, weights=[1,2,3,4,5])
+        gd_score = np.average(gd, weights=[1,2,3,4,5])
+        if (pred_score >= 3 and gd_score >= 3)or(pred_score < 3 and gd_score < 3):
+            return 1.0
+        else:return 0.0
+
+
 
     def update(self, pred, gt):
         if self._metric_type == 'ACC':
@@ -93,12 +108,15 @@ class RunningMetric(object):
 
         if self._metric_type == 'SPCC' :
             # self.rs += (gt.data.cpu().numpy().reshape(-1, 1)).corr((pred.data.cpu().numpy().reshape(-1, 1)), method='spearman')
-            self.rs += self.rank_correlation((gt.data.cpu().numpy().reshape(-1, 1)), (pred.data.cpu().numpy().reshape(-1, 1)))
+            self.rs += self.rank_correlation((gt.data.cpu().numpy().reshape(1, -1)), (pred.data.cpu().numpy().reshape(1, -1)))
             self.num += pred.shape[0]
 
         if self._metric_type == 'PCC' :
             # self.rs += (gt.data.cpu().numpy().reshape(-1, 1)).corr((pred.data.cpu().numpy().reshape(-1, 1)), method='pearson')
-            self.rs += np.corrcoef((gt.data.cpu().numpy().reshape(-1, 1)), (pred.data.cpu().numpy().reshape(-1, 1)))
+            self.rs += np.corrcoef((gt.data.cpu().numpy().reshape(1, -1)), (pred.data.cpu().numpy().reshape(1, -1)))
+            self.num += pred.shape[0]
+        if self._metric_type == 'ACC_DIS' :
+            self.accuracy += self.distrubution_accuracy((pred.data.cpu().numpy().reshape(1, -1)), (gt.data.cpu().numpy().reshape(1, -1)))
             self.num += pred.shape[0]
         
     def get_result(self):
@@ -119,6 +137,8 @@ class RunningMetric(object):
             return {'spcc': self.rs / self.num}
         if self._metric_type == 'PCC' :
             return {'pcc': self.rs / self.num}
+        if self._metric_type == 'ACC_DIS' :
+            return {'acc_dis': self.accuracy / self.num}
 
 
 
@@ -139,5 +159,8 @@ def get_metrics(params):
             met[t] = RunningMetric(metric_type = 'ACC')
     if 'tencent' in params['dataset']:
         for t in params['tasks']:
-            met[t] = RunningMetric(metric_type = 'MSE')
+            met['MSE' + str(t)] = RunningMetric(metric_type = 'MSE')
+            met['SPCC' + str(t)] = RunningMetric(metric_type = 'SPCC')
+            met['PCC' + str(t)] = RunningMetric(metric_type='PCC')
+            met['ACC' + str(t)] = RunningMetric(metric_type='ACC_DIS')
     return met
