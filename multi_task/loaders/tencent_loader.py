@@ -134,7 +134,7 @@ class TENCENT(data.Dataset):
             patches = patches.transpose(0, 3, 2, 1)
         
         # to tensor
-        image = torch.from_numpy(patches).float()
+        # image = torch.from_numpy(patches).float()
         
         return image
 

@@ -16,11 +16,21 @@ def global_transformer():
                                transforms.Normalize((0.1307,), (0.3081,))])
 
 def my_collate(batch):
-    data = [item[0] for item in batch]
+    data  = []
+    for item in batch :
+        patches = item[0]
+        for patch in patches :
+            data.append(patch)
+    data = np.array(data)
+    data = torch.from_numpy(data).float()
     h = [item[1] for item in batch]
-    c = [item[1] for item in batch]
-    f = [item[1] for item in batch]
-    o = [item[1] for item in batch]
+    h = torch.stack(h)
+    c = [item[2] for item in batch]
+    c = torch.stack(c)
+    f = [item[3] for item in batch]
+    f = torch.stack(f)
+    o = [item[4] for item in batch]
+    o = torch.stack(o)
     # target = torch.LongTensor(target)
     return [data, h, c, f, o]
 
