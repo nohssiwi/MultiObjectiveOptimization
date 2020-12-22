@@ -119,7 +119,7 @@ class TENCENT(data.Dataset):
         #     crop = transforms.RandomCrop((400, 200))
         resize = transforms.Resize(454)
         crop = transforms.RandomCrop(256)
-        img = img.resize(img)
+        img = resize(img)
         # extract patches of image
         patches = []
         for i in range(0, self.patch_size) :       
