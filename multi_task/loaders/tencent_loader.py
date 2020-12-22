@@ -5,15 +5,19 @@ import scipy.misc as m
 import numpy as np
 import torchvision.transforms as transforms
 
+from PIL import Image
+
+
 from torch.utils import data
 
 
 class TENCENT(data.Dataset):
-    def __init__(self, root, split = "train", is_transform = False, img_size = (32, 32), augmentations = None):
+    def __init__(self, root, type, patch_number = 10):
         self.root = root
-        self.split = split
-        self.is_transform = is_transform
-        self.augmentations = augmentations
+        self.type = type
+        # self.is_transform = is_transform
+        # self.augmentations = augmentations
+        self.patch_number = patch_number
         self.files = {
             'train' : [],
             'val' : []
@@ -80,39 +84,55 @@ class TENCENT(data.Dataset):
 
 
     def __len__(self):
-        return len(self.files[self.split])
+        return len(self.files[self.type])
 
     def __getitem__(self, index):
-        img_path = self.files[self.split][index]
-        label_h = self.labels[self.split][index]['h']
-        label_c = self.labels[self.split][index]['c']
-        label_f = self.labels[self.split][index]['f']
-        label_o = self.labels[self.split][index]['o']
+        img_path = self.files[self.type][index]
+        label_h = self.labels[self.type][index]['h']
+        label_c = self.labels[self.type][index]['c']
+        label_f = self.labels[self.type][index]['f']
+        label_o = self.labels[self.type][index]['o']
         # print(self.root + '/original_images/' + img_path)
-        img = m.imread(self.root + '/original_images/' + img_path)
-        # matplotlib.pyplot.imread
-        if self.augmentations is not None:
-            img = self.augmentations(np.array(img, dtype=np.uint8))
+        # img = m.imread(self.root + '/original_images/' + img_path)
+        img = Image.open(self.root + '/original_images/' + img_path).convert('RGB')
+        img = self.transform_img(img)
         
-        if self.is_transform:
-            img = self.transform_img(img)
+        
+        # matplotlib.pyplot.imread
+        # if self.augmentations is not None:
+        #     img = self.augmentations(np.array(img, dtype=np.uint8))
+        
+        # if self.is_transform:
+            
 
-        return img, label_h, label_c, label_f, label_o
+        return image, label_h, label_c, label_f, label_o
 
 
     def transform_img(self, img):
-        img = img[:,:,:3]
+        print(img.shape)
+        # img = img[:,:,:3]
         # get height
         h = img.shape[0]
         # get width
         w = img.shape[1]
-        # if h > w :
-        #     img = img.transpose(2, 1, 0)
-        # else :
-        #     img = img.transpose(2, 0, 1)
+        ratio = w/h
+        print(ratio)
+        if h > w :
+            img = img.transpose(2, 1, 0)
+        else :
+            img = img.transpose(2, 0, 1)
         # max_h = 1125
         # max_w = 2436
+        patches = []
+        # extract patches
+        transform = transforms.RandomCrop((200, 400))
 
+        for i in range(0, self.patch_number) :       
+            patch = transform(img)
+            patch = np.array(patch, dtype=np.uint8)
+            patches.append(patch)
+        patches = np.array(patches)
+        image = torch.from_numpy(patches).float()
         # if img.shape[1] < max_h :
         #     padding = (max_h - img.shape[1]) / 2
         #     p1 = int(padding)
@@ -126,12 +146,11 @@ class TENCENT(data.Dataset):
         #     img = np.pad(img, ((0, 0), (0, 0), (p1, p2)), 'constant', constant_values = (0,0))
         # img = img.transpose(1, 2, 0)
         # img -= self.mean
-        img = m.imresize(img, (int(h / 5), int(w / 5)))
-        img = img.transpose(2, 0, 1)
+        # img = m.imresize(img, (int(h / 5), int(w / 5)))
+        # img = img.transpose(2, 0, 1)
         # Resize scales images from 0 to 255, thus we need to divide by 255.0
         # img = img.astype(float) / 255.0
-        img = torch.from_numpy(img).float()
-        return img
+        return image
 
 
 
@@ -139,7 +158,7 @@ class TENCENT(data.Dataset):
 if __name__ == '__main__':
     
     local_path = '../../Qomex_2020_mobile_game_imges'
-    tencent = TENCENT(local_path, is_transform=True, augmentations=None)
-    # print(tencent[0])
+    tencent = TENCENT(local_path, type = 'train')
+    print(tencent[0])
     trainloader = data.DataLoader(tencent, batch_size=4, num_workers=0)
     # print(trainloader)
