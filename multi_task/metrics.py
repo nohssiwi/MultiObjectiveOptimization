@@ -73,8 +73,8 @@ class RunningMetric(object):
         return np.mean(1 - (upper / down))
 
     def distrubution_accuracy(self, pred, gd):
-        pred_score = np.average(pred, weights=[1,2,3,4,5])
-        gd_score = np.average(gd, weights=[1,2,3,4,5])
+        pred_score = np.average(pred, axis = 1, weights=[1,2,3,4,5])
+        gd_score = np.average(gd, axis = 1, weights=[1,2,3,4,5])
         if (pred_score >= 3 and gd_score >= 3)or(pred_score < 3 and gd_score < 3):
             return 1.0
         else:return 0.0
@@ -116,7 +116,7 @@ class RunningMetric(object):
             self.rs += np.corrcoef((gt.data.cpu().numpy().reshape(1, -1)), (pred.data.cpu().numpy().reshape(1, -1)))
             self.num += pred.shape[0]
         if self._metric_type == 'ACC_DIS' :
-            self.accuracy += self.distrubution_accuracy((pred.data.cpu().numpy().reshape(1, -1))[0], (gt.data.cpu().numpy().reshape(1, -1)))
+            self.accuracy += self.distrubution_accuracy((pred.data.cpu().numpy(), (gt.data.cpu().numpy()))
             self.num += pred.shape[0]
 
         
