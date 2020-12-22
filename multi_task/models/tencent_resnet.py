@@ -143,9 +143,9 @@ class TencentDecoder(nn.Module):
         patch_size = self.patch_size
         out = []
         for i in range(0, batch_size) :
-            dis = x[i*patch_size]
+            dis = patches[i*patch_size]
             for j in range(1, patch_size) :
-                dis = dis + x[i*patch_size+j]
+                dis = dis + patches[i*patch_size+j]
             dis = dis / patch_size
             out.append(dis)
         out = torch.stack(out)
