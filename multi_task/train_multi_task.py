@@ -229,7 +229,7 @@ def train_multi_task(param_file):
         for t in tasks:
             writer.add_scalar('validation_loss_{}'.format(t), tot_loss[t]/num_val_batches, n_iter)
             metric_results = metric['MSE' + str(t)].get_result()
-            print('MSE = ' + metric['MSE' + str(t)].get_result().mse + 'SPCC = ' + metric['SPCC' + str(t)].get_result().spcc + 'PCC = ' + metric['PCC' + str(t)].get_result().pcc + 'ACC = ' + metric['ACC' + str(t)].get_result().acc_dis)
+            print('MSE = ' + metric['MSE' + str(t)].get_result()['mse'] + 'SPCC = ' + metric['SPCC' + str(t)].get_result()['spcc'] + 'PCC = ' + metric['PCC' + str(t)].get_result()['pcc'] + 'ACC = ' + metric['ACC' + str(t)].get_result()['acc_dis'])
             for metric_key in metric_results:
                 writer.add_scalar('metric_{}_{}'.format(metric_key, t), metric_results[metric_key], n_iter)
             metric['MSE' + str(t)].reset()
