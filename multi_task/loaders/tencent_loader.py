@@ -105,7 +105,7 @@ class TENCENT(data.Dataset):
         # if self.is_transform:
             
 
-        return image, label_h, label_c, label_f, label_o
+        return img, label_h, label_c, label_f, label_o
 
 
     def transform_img(self, img):
