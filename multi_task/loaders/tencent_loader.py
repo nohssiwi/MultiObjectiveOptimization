@@ -12,7 +12,7 @@ from torch.utils import data
 
 
 class TENCENT(data.Dataset):
-    def __init__(self, root, is_transform = True, type, patch_size = 10):
+    def __init__(self, root, type, patch_size = 10, is_transform = True):
         self.root = root
         self.type = type
         self.is_transform = is_transform
