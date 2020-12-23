@@ -27,10 +27,9 @@ class TENCENT(data.Dataset):
         #     'val' : []
         # }
 
-        dataset = {}
         # all_scores_files = glob.glob(root + '/subjective_scores_v2/*.csv')
 
-        data = pd.csv_reader(root + '/subjective_scores_v2/all.csv)
+        data = pd.read_csv(root + '/subjective_scores_v2/all.csv')
 
         dataset = {
             'train' : [], 
