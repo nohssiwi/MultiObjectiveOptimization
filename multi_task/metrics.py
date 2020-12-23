@@ -19,26 +19,11 @@ class RunningMetric(object):
             self.num_updates = 0.0
             self._n_classes = n_classes
             self.confusion_matrix = np.zeros((n_classes, n_classes))
-        if metric_type == 'MSE':
-            self.sum = 0.0
-            self.num = 0.0
-        if metric_type == 'SPCC':
-            self.rs = 0.0
-            self.num = 0.0
-        if metric_type == 'PLCC':
-            self.rs = 0.0
-            self.num = 0.0
-        if metric_type == 'ACC_DIS':
-            self.accuracy = 0.0
-            self.num = 0.0
+
         if self._metric_type == 'MULTI':
             # MSE SPCC PCC ACC_DIS
-            self.num = 0.0
-            self.mse_sum = 0.0
-            self.spcc_rs = 0.0
-            self.plcc_rs = 0.0
-            self.accuracy = 0.0
-
+            self.gt = []
+            self.pred = []
 
     def reset(self):
         if self._metric_type == 'ACC':
@@ -50,25 +35,11 @@ class RunningMetric(object):
         if self._metric_type == 'IOU':
             self.num_updates = 0.0
             self.confusion_matrix = np.zeros((self._n_classes, self._n_classes))
-        if self._metric_type == 'MSE' :
-            self.sum = 0.0
-            self.num = 0.0
-        if self._metric_type == 'SPCC':
-            self.rs = 0.0
-            self.num = 0.0
-        if self._metric_type == 'PLCC':
-            self.rs = 0.0
-            self.num = 0.0
-        if self._metric_type == 'ACC_DIS':
-            self.accuracy = 0.0
-            self.num = 0.0
+
         if self._metric_type == 'MULTI':
             # MSE SPCC PCC ACC_DIS
-            self.num = 0.0
-            self.mse_sum = 0.0
-            self.spcc_rs = 0.0
-            self.plcc_rs = 0.0
-            self.accuracy = 0.0
+            self.gt = []
+            self.pred = []
 
 
     def _fast_hist(self, pred, gt):
@@ -87,13 +58,16 @@ class RunningMetric(object):
         down = n * (np.square(n) - 1)
         return np.mean(1 - (upper / down))
 
-    def distrubution_accuracy(self, pred, gt):
-        pred_score = np.average(pred, axis = 1, weights=[1,2,3,4,5])
-        gt_score = np.average(gt, axis = 1, weights=[1,2,3,4,5])
-        pred_ge_3 = pred_score >= 3
-        gt_ge_3 = gt_score >= 3
-        return np.sum(pred_ge_3 ==  gt_ge_3)
+    def accuracy(self, pred, gt):
+        pred_ge_3 = pred >= 3
+        gt_ge_3 = gt >= 3
+        return np.sum(pred_ge_3 ==  gt_ge_3) / pred.shape[0]
 
+    def calculate_score(self, dis):
+        return np.average(dis, axis = 1, weights=[1,2,3,4,5])
+
+    def MSE(self, pred, gt):
+        return np.square(pred - gt).mean()
 
 
     def update(self, pred, gt):
@@ -117,31 +91,18 @@ class RunningMetric(object):
             _gt = gt.data.cpu().numpy()
             for lt, lp in zip(_pred, _gt):
                 self.confusion_matrix += self._fast_hist(lt.flatten(), lp.flatten())
-        if self._metric_type == 'MSE' :
-            self.sum += np.sum(np.power((gt.data.cpu().numpy().reshape(-1, 1) - pred.data.cpu().numpy().reshape(-1, 1)), 2))
-            self.num += pred.shape[0]
 
-        if self._metric_type == 'SPCC' :
-            # self.rs += (gt.data.cpu().numpy().reshape(-1, 1)).corr((pred.data.cpu().numpy().reshape(-1, 1)), method='spearman')
-            self.rs += self.rank_correlation((gt.data.cpu().numpy().reshape(1, -1)), (pred.data.cpu().numpy().reshape(1, -1)))
-            self.num += pred.shape[0]
-
-        if self._metric_type == 'PLCC' :
-            # self.rs += (gt.data.cpu().numpy().reshape(-1, 1)).corr((pred.data.cpu().numpy().reshape(-1, 1)), method='pearson')
-            # self.rs += np.corrcoef((gt.data.cpu().numpy().reshape(1, -1)), (pred.data.cpu().numpy().reshape(1, -1)))
-            plcc = stats.pearsonr((gt.data.cpu().numpy().reshape(1, -1)), (pred.data.cpu().numpy().reshape(1, -1)))
-            self.rs += plcc[0]
-            self.num += pred.shape[0]
-        if self._metric_type == 'ACC_DIS' :
-            self.accuracy += self.distrubution_accuracy(pred.data.cpu().numpy(), gt.data.cpu().numpy())
-            self.num += pred.shape[0]
         if self._metric_type == 'MULTI':
-            self.num += pred.shape[0]
-            self.mse_sum += np.sum(np.power((gt.data.cpu().numpy().reshape(-1, 1) - pred.data.cpu().numpy().reshape(-1, 1)), 2))
-            self.spcc_rs += self.rank_correlation((gt.data.cpu().numpy().reshape(1, -1)), (pred.data.cpu().numpy().reshape(1, -1)))
-            plcc = stats.pearsonr((gt.data.cpu().numpy().reshape(1, -1)), (pred.data.cpu().numpy().reshape(1, -1)))
-            self.plcc_rs += plcc[0]
-            self.accuracy += self.distrubution_accuracy(pred.data.cpu().numpy(), gt.data.cpu().numpy())
+            gt_score = self.calculate_score(gt.data.cpu().numpy()).tolist()
+            self.gt += gt_score
+            pred_score = self.calculate_score(pred.data.cpu().numpy()).tolist()
+            self.pred += pred_score
+            # self.num += pred.shape[0]
+            # self.mse_sum += np.sum(np.power((gt.data.cpu().numpy().reshape(-1, 1) - pred.data.cpu().numpy().reshape(-1, 1)), 2))
+            # self.spcc_rs += self.rank_correlation((gt.data.cpu().numpy().reshape(1, -1)), (pred.data.cpu().numpy().reshape(1, -1)))
+            # plcc = stats.pearsonr((gt.data.cpu().numpy().reshape(1, -1)), (pred.data.cpu().numpy().reshape(1, -1)))
+            # self.plcc_rs += plcc[0]
+            # self.accuracy += self.distrubution_accuracy(pred.data.cpu().numpy(), gt.data.cpu().numpy())
 
         
     def get_result(self):
@@ -156,20 +117,15 @@ class RunningMetric(object):
             iou = np.diag(self.confusion_matrix) / (self.confusion_matrix.sum(axis=1) + self.confusion_matrix.sum(axis=0) - np.diag(self.confusion_matrix)) 
             mean_iou = np.nanmean(iou)
             return {'micro_acc': acc, 'macro_acc':acc_cls, 'mIOU': mean_iou}
-        if self._metric_type == 'MSE' :
-            return {'mse': self.sum / self.num}
-        if self._metric_type == 'SPCC' :
-            return {'spcc': self.rs / self.num}
-        if self._metric_type == 'PLCC' :
-            return {'plcc': self.rs / self.num}
-        if self._metric_type == 'ACC_DIS' :
-            return {'acc_dis': self.accuracy / self.num}
+
         if self._metric_type == 'MULTI':
+            pred = np.array(self.pred)
+            gt = np.array(self.gt)
             return {
-                'mse': self.mse_sum / self.num,
-                'spcc': self.spcc_rs / self.num,
-                'plcc': self.plcc_rs / self.num,
-                'acc': self.accuracy / self.num
+                'mse': self.MSE(pred, gt),
+                'spcc': self.rank_correlation(pred, gt),
+                'plcc': stats.pearsonr(pred, gt)[0],
+                'acc': self.accuracy(pred, gt)
             }
 
 
