@@ -30,6 +30,13 @@ class RunningMetric(object):
         if metric_type == 'ACC_DIS':
             self.accuracy = 0.0
             self.num = 0.0
+        if self._metric_type == 'MULTI':
+            # MSE SPCC PCC ACC_DIS
+            self.num = 0.0
+            self.mse_sum = 0.0
+            self.spcc_rs = 0.0
+            self.pcc_rs = 0.0
+            self.accuracy = 0.0
 
 
     def reset(self):
@@ -54,6 +61,13 @@ class RunningMetric(object):
         if self._metric_type == 'ACC_DIS':
             self.accuracy = 0.0
             self.num = 0.0
+        if self._metric_type == 'MULTI':
+            # MSE SPCC PCC ACC_DIS
+            self.num = 0.0
+            self.mse_sum = 0.0
+            self.spcc_rs = 0.0
+            self.pcc_rs = 0.0
+            self.accuracy = 0.0
 
 
     def _fast_hist(self, pred, gt):
@@ -75,10 +89,11 @@ class RunningMetric(object):
     def distrubution_accuracy(self, pred, gt):
         pred_score = np.average(pred, axis = 1, weights=[1,2,3,4,5])
         gt_score = np.average(gt, axis = 1, weights=[1,2,3,4,5])
-        if (pred_score >= 3 and gt_score >= 3) or (pred_score < 3 and gt_score < 3):
-            return 1.0
-        else :
-            return 0.0
+        pred_ge_3 = pred_score >= 3
+        gt_ge_3 = gt_score >= 3
+        pred_l_3 = pred_score < 3
+        gt_l_3 = gt_score < 3
+        return np.sum(pred_ge_3 ==  gt_ge_3) + np.sum(pred_l_3 == gt_l_3)
 
 
 
@@ -119,6 +134,12 @@ class RunningMetric(object):
         if self._metric_type == 'ACC_DIS' :
             self.accuracy += self.distrubution_accuracy(pred.data.cpu().numpy(), gt.data.cpu().numpy())
             self.num += pred.shape[0]
+        if self._metric_type == 'MULTI':
+            self.num += pred.shape[0]
+            self.mse_sum += np.sum(np.power((gt.data.cpu().numpy().reshape(-1, 1) - pred.data.cpu().numpy().reshape(-1, 1)), 2))
+            self.spcc_rs += self.rank_correlation((gt.data.cpu().numpy().reshape(1, -1)), (pred.data.cpu().numpy().reshape(1, -1)))
+            self.pcc_rs += np.corrcoef((gt.data.cpu().numpy().reshape(1, -1)), (pred.data.cpu().numpy().reshape(1, -1)))
+            self.accuracy += self.distrubution_accuracy(pred.data.cpu().numpy(), gt.data.cpu().numpy())
 
         
     def get_result(self):
@@ -141,6 +162,13 @@ class RunningMetric(object):
             return {'pcc': self.rs / self.num}
         if self._metric_type == 'ACC_DIS' :
             return {'acc_dis': self.accuracy / self.num}
+        if self._metric_type == 'MULTI':
+            return {
+                'mse': self.mse_sum / self.num,
+                'spcc': self.spcc_rs / self.num,
+                'pcc': self.pcc_rs / self.num,
+                'acc_dis': self.accuracy / self.num
+            }
 
 
 
@@ -161,8 +189,9 @@ def get_metrics(params):
             met[t] = RunningMetric(metric_type = 'ACC')
     if 'tencent' in params['dataset']:
         for t in params['tasks']:
-            met['MSE' + str(t)] = RunningMetric(metric_type = 'MSE')
-            met['SPCC' + str(t)] = RunningMetric(metric_type = 'SPCC')
-            met['PCC' + str(t)] = RunningMetric(metric_type='PCC')
-            met['ACC' + str(t)] = RunningMetric(metric_type='ACC_DIS')
+            met[t] = RunningMetric(metric_type = 'MULTI')
+            # met['MSE' + str(t)] = RunningMetric(metric_type = 'MSE')
+            # met['SPCC' + str(t)] = RunningMetric(metric_type = 'SPCC')
+            # met['PCC' + str(t)] = RunningMetric(metric_type='PCC')
+            # met['ACC' + str(t)] = RunningMetric(metric_type='ACC_DIS')
     return met

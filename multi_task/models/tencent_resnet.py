@@ -101,8 +101,8 @@ class TencentDecoder(nn.Module):
 
     def aggragate(self, patches) :
         # aggragate patches
-        batch_size = self.batch_size
         patch_size = self.patch_size
+        batch_size = patches.shape[0] / patch_size
         out = []
         for i in range(0, batch_size) :
             dis = patches[i*patch_size]
