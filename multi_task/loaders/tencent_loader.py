@@ -37,8 +37,6 @@ class TENCENT(data.Dataset):
             'test' : []
         }
 
-        train_df = data[data['type']=='train']
-        train = []
         for index, row in data.iterrows():
             item = {
                 'filename' : row['filename'],
@@ -49,7 +47,7 @@ class TENCENT(data.Dataset):
             }
             if row['type'] == 'train' :
                 dataset['train'].append(item)
-            elif row['type'] == 'val' :
+            elif row['type'] == 'validation' :
                 dataset['val'].append(item)
             else :
                 dataset['test'].append(item)
