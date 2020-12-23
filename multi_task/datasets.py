@@ -25,16 +25,20 @@ def my_collate(batch):
     data = torch.from_numpy(data).float()
     h = [item[1] for item in batch]
     # h = torch.stack(h)
+    h = np.array(h)
     h = torch.from_numpy(h).float()
     c = [item[2] for item in batch]
     # c = torch.stack(c)
+    c = np.array(c)
     c = torch.from_numpy(c).float()
     f = [item[3] for item in batch]
     # f = torch.stack(f)
+    f = np.array(f)
     f = torch.from_numpy(f).float()
     o = [item[4] for item in batch]
     # o = torch.stack(o)
-    f = torch.from_numpy(f).float()
+    o = np.array(o)
+    o = torch.from_numpy(o).float()
     # target = torch.LongTensor(target)
     return [data, h, c, f, o]
 
