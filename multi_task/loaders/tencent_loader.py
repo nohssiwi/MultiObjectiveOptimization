@@ -107,6 +107,7 @@ class TENCENT(data.Dataset):
             v = int(v)
             dis[v-1] = dis[v-1] + 1
         dis = dis / 20
+        dis = dis.reshape(-1, 1)
         return dis
 
 
