@@ -42,10 +42,10 @@ class TENCENT(data.Dataset):
         for index, row in data.iterrows():
             item = {
                 'filename' : row['filename'],
-                'label_h' : distribution(row['h_0':'h_19']),
-                'label_c' : distribution(row['c_0':'c_19']),
-                'label_f' : distribution(row['f_0':'f_19']),
-                'label_o' : distribution(row['o_0':'o_19'])
+                'label_h' : self.distribution(row['h_0':'h_19']),
+                'label_c' : self.distribution(row['c_0':'c_19']),
+                'label_f' : self.distribution(row['f_0':'f_19']),
+                'label_o' : self.distribution(row['o_0':'o_19'])
             }
             if row['type'] == 'train' :
                 dataset['train'].append(item)
