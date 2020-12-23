@@ -42,10 +42,10 @@ class TENCENT(data.Dataset):
         for index, row in data.iterrows():
             item = {
                 'filename' : row['filename'],
-                'label_h' : self.distribution(row['h_0':'h_19']),
-                'label_c' : self.distribution(row['c_0':'c_19']),
-                'label_f' : self.distribution(row['f_0':'f_19']),
-                'label_o' : self.distribution(row['o_0':'o_19'])
+                'label_h' : torch.tensor(self.distribution(row['h_0':'h_19'])),
+                'label_c' : torch.tensor(self.distribution(row['c_0':'c_19'])),
+                'label_f' : torch.tensor(self.distribution(row['f_0':'f_19'])),
+                'label_o' : torch.tensor(self.distribution(row['o_0':'o_19']))
             }
             if row['type'] == 'train' :
                 dataset['train'].append(item)
@@ -132,11 +132,6 @@ class TENCENT(data.Dataset):
         #     img = self.augmentations(np.array(img, dtype=np.uint8))
         
         # if self.is_transform:
-        
-        label_h = torch.from_numpy(label_h).float()
-        label_c = torch.from_numpy(label_c).float()
-        label_f = torch.from_numpy(label_f).float()
-        label_o = torch.from_numpy(label_o).float()
 
         return img, label_h, label_c, label_f, label_o
 
