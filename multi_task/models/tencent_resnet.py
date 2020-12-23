@@ -96,13 +96,14 @@ class TencentDecoder(nn.Module):
         self.patch_size = patch_size
         self.dropout = nn.Dropout(p=0.75)
         # self.fc = nn.Linear(36864, 5)        
-        self.fc = nn.Linear(32768, 5)
+        # self.fc = nn.Linear(32768, 5)
+        self.fc = nn.Linear(8192, 5)
         self.s = nn.Softmax(dim=1)
 
     def aggragate(self, patches) :
         # aggragate patches
         patch_size = self.patch_size
-        batch_size = patches.shape[0] / patch_size
+        batch_size = int(patches.shape[0] / patch_size)
         out = []
         for i in range(0, batch_size) :
             dis = patches[i*patch_size]

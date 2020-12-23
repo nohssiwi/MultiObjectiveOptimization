@@ -234,7 +234,7 @@ def train_multi_task(param_file):
             # print('MSE = ' + metric['MSE' + str(t)].get_result() + 'SPCC = ' + metric['SPCC' + str(t)].get_result() + 'PCC = ' + metric['PCC' + str(t)].get_result() + 'ACC = ' + metric['ACC' + str(t)].get_result())
             metric_str = 'task_{} : '.format(t)
             for metric_key in metric_results:
-                writer.add_scalar('metric_{}_{}'.format(metric_key, t), metric_results[metric_key], n_iter)
+                writer.add_scalar('metric_{}_{} | '.format(metric_key, t), metric_results[metric_key], n_iter)
                 metric_str += '{} = {}'.format(metric_key, metric_results[metric_key])
             # metric['MSE' + str(t)].reset()
             # metric['SPCC' + str(t)].reset()

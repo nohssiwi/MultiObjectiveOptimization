@@ -91,9 +91,7 @@ class RunningMetric(object):
         gt_score = np.average(gt, axis = 1, weights=[1,2,3,4,5])
         pred_ge_3 = pred_score >= 3
         gt_ge_3 = gt_score >= 3
-        pred_l_3 = pred_score < 3
-        gt_l_3 = gt_score < 3
-        return np.sum(pred_ge_3 ==  gt_ge_3) + np.sum(pred_l_3 == gt_l_3)
+        return np.sum(pred_ge_3 ==  gt_ge_3)
 
 
 
