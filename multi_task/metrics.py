@@ -2,6 +2,7 @@
 
 from losses import l1_loss_instance
 import numpy as np
+from scipy import stats
 
 class RunningMetric(object):
     def __init__(self, metric_type, n_classes =None):
@@ -24,7 +25,7 @@ class RunningMetric(object):
         if metric_type == 'SPCC':
             self.rs = 0.0
             self.num = 0.0
-        if metric_type == 'PCC':
+        if metric_type == 'PLCC':
             self.rs = 0.0
             self.num = 0.0
         if metric_type == 'ACC_DIS':
@@ -35,7 +36,7 @@ class RunningMetric(object):
             self.num = 0.0
             self.mse_sum = 0.0
             self.spcc_rs = 0.0
-            self.pcc_rs = 0.0
+            self.plcc_rs = 0.0
             self.accuracy = 0.0
 
 
@@ -55,7 +56,7 @@ class RunningMetric(object):
         if self._metric_type == 'SPCC':
             self.rs = 0.0
             self.num = 0.0
-        if self._metric_type == 'PCC':
+        if self._metric_type == 'PLCC':
             self.rs = 0.0
             self.num = 0.0
         if self._metric_type == 'ACC_DIS':
@@ -66,7 +67,7 @@ class RunningMetric(object):
             self.num = 0.0
             self.mse_sum = 0.0
             self.spcc_rs = 0.0
-            self.pcc_rs = 0.0
+            self.plcc_rs = 0.0
             self.accuracy = 0.0
 
 
@@ -127,9 +128,11 @@ class RunningMetric(object):
             self.rs += self.rank_correlation((gt.data.cpu().numpy().reshape(1, -1)), (pred.data.cpu().numpy().reshape(1, -1)))
             self.num += pred.shape[0]
 
-        if self._metric_type == 'PCC' :
+        if self._metric_type == 'PLCC' :
             # self.rs += (gt.data.cpu().numpy().reshape(-1, 1)).corr((pred.data.cpu().numpy().reshape(-1, 1)), method='pearson')
-            self.rs += np.corrcoef((gt.data.cpu().numpy().reshape(1, -1)), (pred.data.cpu().numpy().reshape(1, -1)))
+            # self.rs += np.corrcoef((gt.data.cpu().numpy().reshape(1, -1)), (pred.data.cpu().numpy().reshape(1, -1)))
+            plcc = stats.pearsonr((gt.data.cpu().numpy().reshape(1, -1)), (pred.data.cpu().numpy().reshape(1, -1)))
+            self.rs += plcc[0]
             self.num += pred.shape[0]
         if self._metric_type == 'ACC_DIS' :
             self.accuracy += self.distrubution_accuracy(pred.data.cpu().numpy(), gt.data.cpu().numpy())
@@ -138,7 +141,7 @@ class RunningMetric(object):
             self.num += pred.shape[0]
             self.mse_sum += np.sum(np.power((gt.data.cpu().numpy().reshape(-1, 1) - pred.data.cpu().numpy().reshape(-1, 1)), 2))
             self.spcc_rs += self.rank_correlation((gt.data.cpu().numpy().reshape(1, -1)), (pred.data.cpu().numpy().reshape(1, -1)))
-            self.pcc_rs += np.corrcoef((gt.data.cpu().numpy().reshape(1, -1)), (pred.data.cpu().numpy().reshape(1, -1)))
+            self.plcc_rs += np.corrcoef((gt.data.cpu().numpy().reshape(1, -1)), (pred.data.cpu().numpy().reshape(1, -1)))
             self.accuracy += self.distrubution_accuracy(pred.data.cpu().numpy(), gt.data.cpu().numpy())
 
         
@@ -158,15 +161,15 @@ class RunningMetric(object):
             return {'mse': self.sum / self.num}
         if self._metric_type == 'SPCC' :
             return {'spcc': self.rs / self.num}
-        if self._metric_type == 'PCC' :
-            return {'pcc': self.rs / self.num}
+        if self._metric_type == 'PLCC' :
+            return {'plcc': self.rs / self.num}
         if self._metric_type == 'ACC_DIS' :
             return {'acc_dis': self.accuracy / self.num}
         if self._metric_type == 'MULTI':
             return {
                 'mse': self.mse_sum / self.num,
                 'spcc': self.spcc_rs / self.num,
-                'pcc': self.pcc_rs / self.num,
+                'plcc': self.plcc_rs / self.num,
                 'acc_dis': self.accuracy / self.num
             }
 
