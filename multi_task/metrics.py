@@ -21,7 +21,7 @@ class RunningMetric(object):
             self.confusion_matrix = np.zeros((n_classes, n_classes))
 
         if self._metric_type == 'MULTI':
-            # MSE SPCC PCC ACC_DIS
+            # MSE SPCC PCC ACC
             self.gt = []
             self.pred = []
 
@@ -97,12 +97,6 @@ class RunningMetric(object):
             self.gt += gt_score
             pred_score = self.calculate_score(pred.data.cpu().numpy()).tolist()
             self.pred += pred_score
-            # self.num += pred.shape[0]
-            # self.mse_sum += np.sum(np.power((gt.data.cpu().numpy().reshape(-1, 1) - pred.data.cpu().numpy().reshape(-1, 1)), 2))
-            # self.spcc_rs += self.rank_correlation((gt.data.cpu().numpy().reshape(1, -1)), (pred.data.cpu().numpy().reshape(1, -1)))
-            # plcc = stats.pearsonr((gt.data.cpu().numpy().reshape(1, -1)), (pred.data.cpu().numpy().reshape(1, -1)))
-            # self.plcc_rs += plcc[0]
-            # self.accuracy += self.distrubution_accuracy(pred.data.cpu().numpy(), gt.data.cpu().numpy())
 
         
     def get_result(self):
