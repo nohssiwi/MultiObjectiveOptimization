@@ -132,7 +132,11 @@ class TENCENT(data.Dataset):
         #     img = self.augmentations(np.array(img, dtype=np.uint8))
         
         # if self.is_transform:
-            
+        
+        label_h = torch.from_numpy(label_h).float()
+        label_c = torch.from_numpy(label_c).float()
+        label_f = torch.from_numpy(label_f).float()
+        label_o = torch.from_numpy(label_o).float()
 
         return img, label_h, label_c, label_f, label_o
 

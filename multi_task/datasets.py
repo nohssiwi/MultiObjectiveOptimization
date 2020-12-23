@@ -24,22 +24,13 @@ def my_collate(batch):
     data = np.array(data)
     data = torch.from_numpy(data).float()
     h = [item[1] for item in batch]
-    # h = torch.stack(h)
-    h = np.array(h)
-    h = torch.from_numpy(h).float()
+    h = torch.stack(h)
     c = [item[2] for item in batch]
-    # c = torch.stack(c)
-    c = np.array(c)
-    c = torch.from_numpy(c).float()
+    c = torch.stack(c)
     f = [item[3] for item in batch]
-    # f = torch.stack(f)
-    f = np.array(f)
-    f = torch.from_numpy(f).float()
+    f = torch.stack(f)
     o = [item[4] for item in batch]
-    # o = torch.stack(o)
-    o = np.array(o)
-    o = torch.from_numpy(o).float()
-    # target = torch.LongTensor(target)
+    o = torch.stack(o)
     return [data, h, c, f, o]
 
 def get_dataset(params, configs):
