@@ -139,7 +139,8 @@ class RunningMetric(object):
             self.num += pred.shape[0]
             self.mse_sum += np.sum(np.power((gt.data.cpu().numpy().reshape(-1, 1) - pred.data.cpu().numpy().reshape(-1, 1)), 2))
             self.spcc_rs += self.rank_correlation((gt.data.cpu().numpy().reshape(1, -1)), (pred.data.cpu().numpy().reshape(1, -1)))
-            self.plcc_rs += np.corrcoef((gt.data.cpu().numpy().reshape(1, -1)), (pred.data.cpu().numpy().reshape(1, -1)))
+            plcc = stats.pearsonr((gt.data.cpu().numpy().reshape(1, -1)), (pred.data.cpu().numpy().reshape(1, -1)))
+            self.plcc_rs += plcc[0]
             self.accuracy += self.distrubution_accuracy(pred.data.cpu().numpy(), gt.data.cpu().numpy())
 
         
@@ -168,7 +169,7 @@ class RunningMetric(object):
                 'mse': self.mse_sum / self.num,
                 'spcc': self.spcc_rs / self.num,
                 'plcc': self.plcc_rs / self.num,
-                'acc_dis': self.accuracy / self.num
+                'acc': self.accuracy / self.num
             }
 
 
@@ -191,8 +192,4 @@ def get_metrics(params):
     if 'tencent' in params['dataset']:
         for t in params['tasks']:
             met[t] = RunningMetric(metric_type = 'MULTI')
-            # met['MSE' + str(t)] = RunningMetric(metric_type = 'MSE')
-            # met['SPCC' + str(t)] = RunningMetric(metric_type = 'SPCC')
-            # met['PCC' + str(t)] = RunningMetric(metric_type='PCC')
-            # met['ACC' + str(t)] = RunningMetric(metric_type='ACC_DIS')
     return met

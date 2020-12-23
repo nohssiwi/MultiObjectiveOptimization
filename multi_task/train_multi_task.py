@@ -220,26 +220,16 @@ def train_multi_task(param_file):
                 loss_t = loss_fn[t](out_t_val, labels_val[t])
                 tot_loss['all'] += loss_t.item()
                 tot_loss[t] += loss_t.item()
-                # metric['MSE' + str(t)].update(out_t_val, labels_val[t])
-                # metric['SPCC' + str(t)].update(out_t_val, labels_val[t])
-                # metric['PCC' + str(t)].update(out_t_val, labels_val[t])
-                # metric['ACC' + str(t)].update(out_t_val, labels_val[t])
                 metric[t].update(out_t_val, labels_val[t])
             num_val_batches+=1
 
         for t in tasks:
             writer.add_scalar('validation_loss_{}'.format(t), tot_loss[t]/num_val_batches, n_iter)
-            # metric_results = metric['MSE' + str(t)].get_result()
             metric_results = metric[t].get_result()
-            # print('MSE = ' + metric['MSE' + str(t)].get_result() + 'SPCC = ' + metric['SPCC' + str(t)].get_result() + 'PCC = ' + metric['PCC' + str(t)].get_result() + 'ACC = ' + metric['ACC' + str(t)].get_result())
             metric_str = 'task_{} : '.format(t)
             for metric_key in metric_results:
                 writer.add_scalar('metric_{}_{} | '.format(metric_key, t), metric_results[metric_key], n_iter)
                 metric_str += '{} = {}'.format(metric_key, metric_results[metric_key])
-            # metric['MSE' + str(t)].reset()
-            # metric['SPCC' + str(t)].reset()
-            # metric['PCC' + str(t)].reset()
-            # metric['ACC' + str(t)].reset()
             metric[t].reset()
             print(metric_str)
         writer.add_scalar('validation_loss', tot_loss['all']/len(val_dst), n_iter)
