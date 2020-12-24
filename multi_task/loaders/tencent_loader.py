@@ -69,7 +69,6 @@ class TENCENT(data.Dataset):
         if self.is_transform :
             img = self.transform_img(img)
 
-
         return img, label_h, label_c, label_f, label_o
 
 
@@ -85,23 +84,29 @@ class TENCENT(data.Dataset):
         crop = transforms.RandomCrop(128)
         img = resize(img)
         # extract patches of image
-        patches = []
-        for i in range(0, self.patch_size) :       
-            patch = crop(img)
-            patch = np.array(patch, dtype = np.uint8)
-            patches.append(patch)
-        patches = np.array(patches)
+        if(self.patch_size > 0) :
+            patches = []
+            for i in range(0, self.patch_size) :       
+                patch = crop(img)
+                patch = np.array(patch, dtype = np.uint8)
+                patches.append(patch)
+            patches = np.array(patches)
 
-        # transpose to make sure width > height
-        # if (width > height) :
-        #     patches = patches.transpose(0, 3, 1, 2)
-        # else :
-        #     patches = patches.transpose(0, 3, 2, 1)
-        patches = patches.transpose(0, 3, 1, 2)
-        # to tensor
-        # image = torch.from_numpy(patches).float()
-        
-        return patches
+            # transpose to make sure width > height
+            # if (width > height) :
+            #     patches = patches.transpose(0, 3, 1, 2)
+            # else :
+            #     patches = patches.transpose(0, 3, 2, 1)
+            patches = patches.transpose(0, 3, 1, 2)
+            image = patches
+        else :
+            # to tensor
+            toTensor = transforms.ToTensor()
+            img = toTensor(img)
+            # image = torch.from_numpy(patches).float()
+            image = img
+
+        return image
 
 
 if __name__ == '__main__':

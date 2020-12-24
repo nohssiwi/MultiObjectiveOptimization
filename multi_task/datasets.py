@@ -64,10 +64,11 @@ def get_dataset(params, configs):
     if 'tencent' in params['dataset']:
         train_dst = TENCENT(root=configs['tencent']['path'], is_transform=True, type='train', patch_size = params['patch_size'])
         val_dst = TENCENT(root=configs['tencent']['path'], is_transform=True, type='val', patch_size = params['patch_size'])
-
-        train_loader = torch.utils.data.DataLoader(train_dst, batch_size = params['batch_size'], shuffle=True, num_workers=4, collate_fn=my_collate)
-        val_loader = torch.utils.data.DataLoader(val_dst, batch_size = params['batch_size'], num_workers=4, collate_fn=my_collate)
-
-        # train_loader = torch.utils.data.DataLoader(train_dst, batch_size=params['batch_size'], shuffle=True, num_workers=4)
-        # val_loader = torch.utils.data.DataLoader(val_dst, batch_size=params['batch_size'], num_workers=4)
+        
+        if (params['patch_size'] > 0) :
+            train_loader = torch.utils.data.DataLoader(train_dst, batch_size = params['batch_size'], shuffle=True, num_workers=4, collate_fn=my_collate)
+            val_loader = torch.utils.data.DataLoader(val_dst, batch_size = params['batch_size'], num_workers=4, collate_fn=my_collate)
+        else :
+            train_loader = torch.utils.data.DataLoader(train_dst, batch_size=params['batch_size'], shuffle=True, num_workers=4)
+            val_loader = torch.utils.data.DataLoader(val_dst, batch_size=params['batch_size'], num_workers=4)
         return train_loader, train_dst, val_loader, val_dst
