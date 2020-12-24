@@ -5,6 +5,7 @@ import scipy.misc as m
 import numpy as np
 import torchvision.transforms as transforms
 import pandas as pd
+import math
 from PIL import Image
 
 
@@ -86,9 +87,9 @@ class TENCENT(data.Dataset):
         h = img.size[1]
         if (w > h) :
             # (454, 984)
-            padding = (int((984-w) / 2), 0)
+            padding = (math.ceil((984-w) / 2), 0, math.floor((984-w) / 2), 0)
         else :
-            padding = (0, int((984-h) / 2))
+            padding = (0, math.ceil((984-h) / 2), 0, math.floor((984-h) / 2))
         pad = transforms.Pad(padding, fill=0, padding_mode='constant')
         crop = transforms.RandomCrop(128)
         
@@ -109,14 +110,11 @@ class TENCENT(data.Dataset):
             patches = patches.transpose(0, 3, 1, 2)
             image = patches
         else :
-            img = pad(img)
             toTensor = transforms.ToTensor()
+            img = pad(img)
             img = toTensor(img)
-            # img = np.array(img)
-            if (w > h) :
-                img = img.transpose(2, 0, 1)
-            else :
-                img = img.transpose(2, 1, 0)
+            if (h < w) :
+                img = img.permute(0, 2, 1)
             # image = torch.from_numpy(img).float()
             image = img
 
