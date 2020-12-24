@@ -64,7 +64,8 @@ class RunningMetric(object):
         return np.sum(pred_ge_3 ==  gt_ge_3) / pred.shape[0]
 
     def calculate_score(self, dis):
-        return np.average(dis, axis = 1, weights=[1,2,3,4,5])
+        weights = np.array([1, 2, 3, 4 ,5])
+        return np.sum(dis * weights, axis=1)
 
     def MSE(self, pred, gt):
         return np.square(pred - gt).mean()
@@ -93,9 +94,9 @@ class RunningMetric(object):
                 self.confusion_matrix += self._fast_hist(lt.flatten(), lp.flatten())
 
         if self._metric_type == 'MULTI':
-            gt_score = self.calculate_score(gt.data.cpu().numpy()).tolist()
+            gt_score = self.calculate_score(gt.data.cpu().numpy().reshape(-1,5)).tolist()
             self.gt += gt_score
-            pred_score = self.calculate_score(pred.data.cpu().numpy()).tolist()
+            pred_score = self.calculate_score(pred.data.cpu().numpy().reshape(-1,5)).tolist()
             self.pred += pred_score
 
         
