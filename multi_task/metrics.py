@@ -49,26 +49,17 @@ class RunningMetric(object):
             pred[mask], minlength=self._n_classes**2).reshape(self._n_classes, self._n_classes)
         return hist
 
-    # def rank_correlation(self, att_map, att_gt):
-    #     """
-    #     Function that measures Spearman’s correlation coefficient between target and output:
-    #     """
-    #     n = att_map.shape[1]
-    #     upper = 6 * np.sum(np.square(att_gt - att_map), axis=-1)
-    #     down = n * (np.square(n) - 1)
-    #     return np.mean(1 - (upper / down))
-
-    def accuracy(self, pred, gt):
-        pred_ge_3 = pred >= 3
-        gt_ge_3 = gt >= 3
-        return np.sum(pred_ge_3 ==  gt_ge_3) / pred.shape[0]
-
     def calculate_score(self, dis):
         weights = np.array([1, 2, 3, 4 ,5])
         return np.sum(dis * weights, axis=1)
 
     def MSE(self, pred, gt):
         return np.square(pred - gt).mean()
+
+    def accuracy(self, pred, gt):
+        pred_ge_3 = pred >= 3
+        gt_ge_3 = gt >= 3
+        return np.sum(pred_ge_3 ==  gt_ge_3) / pred.shape[0]
 
 
     def update(self, pred, gt):

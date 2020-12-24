@@ -110,9 +110,10 @@ class ResNet(nn.Module):
         out = self.layer4(out)
         out = F.avg_pool2d(out, 4)
         if(self.patch_size > 0) :
-            out = self.spatial_pyramid_pool(out, out.size(0), [int(out.size(2)), int(out.size(3))], [4,2,1])
+            out = out.view(out.size(0), -1)
         else :
             out = out.view(out.size(0), -1)
+            # out = self.spatial_pyramid_pool(out, out.size(0), [int(out.size(2)), int(out.size(3))], [3,2,1])
         return out, mask
 
 
@@ -129,22 +130,25 @@ class TencentDecoder(nn.Module):
         self.s = nn.Softmax(dim=1)
 
     def aggragate(self, patches) :
+        out = patches.reshape(-1, self.patch_size, 5)
+        out = torch.sum(patches, dim=1) / self.patch_size
         # aggragate patches
-        patch_size = self.patch_size
-        batch_size = int(patches.shape[0] / patch_size)
-        out = []
-        for i in range(0, batch_size) :
-            dis = patches[i*patch_size]
-            for j in range(1, patch_size) :
-                dis = dis + patches[i*patch_size+j]
-            dis = dis / patch_size
-            out.append(dis)
-        out = torch.stack(out)
+        # patch_size = self.patch_size
+        # batch_size = int(patches.shape[0] / patch_size)
+        # out = []
+        # for i in range(0, batch_size) :
+        #     dis = patches[i*patch_size]
+        #     for j in range(1, patch_size) :
+        #         dis = dis + patches[i*patch_size+j]
+        #     dis = dis / patch_size
+        #     out.append(dis)
+        # out = torch.stack(out)
         return out
 
 
     def forward(self, conv_out, mask):
         out = self.dropout(conv_out)
+        # print(out.shape)
         out = self.fc(out)
         out = self.s(out)
         if(self.patch_size > 0) :

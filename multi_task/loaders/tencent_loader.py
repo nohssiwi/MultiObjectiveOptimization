@@ -80,11 +80,20 @@ class TENCENT(data.Dataset):
         #     crop = transforms.RandomCrop((200, 400))
         # else :
         #     crop = transforms.RandomCrop((400, 200))
-        resize = transforms.Resize(256)
-        crop = transforms.RandomCrop(128)
+        resize = transforms.Resize(454)
         img = resize(img)
+        w = img.size[0]
+        h = img.size[1]
+        if (w > h) :
+            # (454, 984)
+            padding = (int((984-w) / 2), 0)
+        else :
+            padding = (0, int((984-h) / 2))
+        pad = transforms.Pad(padding, fill=0, padding_mode='constant')
+        crop = transforms.RandomCrop(128)
+        
         # extract patches of image
-        if(self.patch_size > 0) :
+        if (self.patch_size > 0) :
             patches = []
             for i in range(0, self.patch_size) :       
                 patch = crop(img)
@@ -100,10 +109,16 @@ class TENCENT(data.Dataset):
             patches = patches.transpose(0, 3, 1, 2)
             image = patches
         else :
+            img = pad(img)
+            img = np.array(img)
+            if (w > h) :
+                patches = patches.transpose(2, 0, 1)
+            else :
+                patches = patches.transpose(2, 1, 0)
             # to tensor
-            toTensor = transforms.ToTensor()
-            img = toTensor(img)
-            # image = torch.from_numpy(patches).float()
+            # toTensor = transforms.ToTensor()
+            # img = toTensor(img)
+            image = torch.from_numpy(img).float()
             image = img
 
         return image
