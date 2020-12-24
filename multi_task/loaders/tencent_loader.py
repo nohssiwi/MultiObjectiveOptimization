@@ -81,15 +81,18 @@ class TENCENT(data.Dataset):
         #     crop = transforms.RandomCrop((200, 400))
         # else :
         #     crop = transforms.RandomCrop((400, 200))
-        resize = transforms.Resize(454)
+        # (454, 984)
+        # (256, 554)
+        _h = 256
+        _w = 554
+        resize = transforms.Resize(_h)
         img = resize(img)
         w = img.size[0]
         h = img.size[1]
         if (w > h) :
-            # (454, 984)
-            padding = (math.ceil((984-w) / 2), 0, math.floor((984-w) / 2), 0)
+            padding = (math.ceil((_w-w) / 2), 0, math.floor((_w-w) / 2), 0)
         else :
-            padding = (0, math.ceil((984-h) / 2), 0, math.floor((984-h) / 2))
+            padding = (0, math.ceil((_w-h) / 2), 0, math.floor((_w-h) / 2))
         pad = transforms.Pad(padding, fill=0, padding_mode='constant')
         crop = transforms.RandomCrop(128)
         
