@@ -110,15 +110,14 @@ class TENCENT(data.Dataset):
             image = patches
         else :
             img = pad(img)
-            img = np.array(img)
+            toTensor = transforms.ToTensor()
+            img = toTensor(img)
+            # img = np.array(img)
             if (w > h) :
-                patches = patches.transpose(2, 0, 1)
+                img = img.transpose(2, 0, 1)
             else :
-                patches = patches.transpose(2, 1, 0)
-            # to tensor
-            # toTensor = transforms.ToTensor()
-            # img = toTensor(img)
-            image = torch.from_numpy(img).float()
+                img = img.transpose(2, 1, 0)
+            # image = torch.from_numpy(img).float()
             image = img
 
         return image
