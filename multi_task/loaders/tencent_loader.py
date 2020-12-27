@@ -91,11 +91,11 @@ class TENCENT(data.Dataset):
         # extract patches of image
         patches = []
         for i in range(0, self.patch_size) :  
-            patch = toTensor(patch)
+            patch = toTensor(img)
             # transpose to make sure width > height
             if (width < height) :
                 patch = patch.permute(0, 2, 1)
-            patch = crop(img)
+            patch = crop(patch)
             patches.append(patch)
         patches = torch.stack(patches)
         image = patches
