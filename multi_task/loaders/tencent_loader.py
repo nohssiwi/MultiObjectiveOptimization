@@ -83,8 +83,9 @@ class TENCENT(data.Dataset):
         #     crop = transforms.RandomCrop((400, 200))
         # (454, 984)
         # (256, 554)
-        _h = 256
-        _w = 554
+        # 225 487
+        _h = 225
+        _w = 487
         resize = transforms.Resize(_h)
         img = resize(img)
         w = img.size[0]
