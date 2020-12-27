@@ -77,8 +77,8 @@ class TENCENT(data.Dataset):
         # get width and height of image
         # width = img.size[0]
         # height = img.size[1]
-        _h = 454
-        _w = 984
+        _h = 1080
+        _w = 2340
         resize = transforms.Resize(_h)
         img = resize(img)
         w = img.size[0]
@@ -89,7 +89,7 @@ class TENCENT(data.Dataset):
         #     padding = (0, math.ceil((_w-h) / 2), 0, math.floor((_w-h) / 2))
         pad = transforms.Pad(padding, fill=0, padding_mode='constant')
         toTensor = transforms.ToTensor()
-        
+
         img = toTensor(img)
         if (h < w) :
             img = img.permute(0, 2, 1)
