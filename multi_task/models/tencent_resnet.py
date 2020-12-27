@@ -145,7 +145,7 @@ class TencentEncoder(nn.Module) :
                 spp = torch.cat((spp,x.view(num_sample,-1)), 1)
         return spp
     
-    def forward(self, x):
+    def forward(self, x, mask):
         x = self.model.conv1(x)
         x = self.model.bn1(x)
         x = self.model.relu(x)
@@ -156,7 +156,7 @@ class TencentEncoder(nn.Module) :
         x = self.model.layer4(x)
         x = self.model.avgpool(x)
         x = x.view(x.size(0), x.size(1))
-        return x
+        return x, mask
 
 class TencentDecoder(nn.Module):
     def __init__(self, patch_size):
