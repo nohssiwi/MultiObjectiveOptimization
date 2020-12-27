@@ -80,31 +80,24 @@ class TENCENT(data.Dataset):
         # (454, 984)
         _h = 454
         _w = 984
-        # if (width > height) :
-        #     crop = transforms.RandomCrop((_h, _w))
-        # else :
-        #     crop = transforms.RandomCrop((_w, _h))
         resize = transforms.Resize(_h)
         img = resize(img)
         crop = transforms.RandomCrop(256)
-        
+
         # extract patches of image
         patches = []
-        for i in range(0, self.patch_size) :       
+        for i in range(0, self.patch_size) :   
             patch = crop(img)
-            patch = np.array(patch, dtype = np.uint8)
+            patch = toTensor(patch)
             patches.append(patch)
-        patches = np.array(patches)
+        patches = torch.stack(patches)
+        image = patches
 
         # transpose to make sure width > height
         # if (width > height) :
         #     patches = patches.transpose(0, 3, 1, 2)
         # else :
         #     patches = patches.transpose(0, 3, 2, 1)
-        # patches = patches.transpose(0, 3, 1, 2)
-        # image = patches
-        toTensor = transforms.ToTensor()
-        image = toTensor(patches)
 
         return image
 
