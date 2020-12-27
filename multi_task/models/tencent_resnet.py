@@ -121,6 +121,7 @@ class TencentEncoder(nn.Module) :
     def __init__(self) :
         super(TencentEncoder, self).__init__()
         self.model = models.resnet18(pretrained=True)
+        self.model.avgpool = nn.AdaptiveAvgPool2d((4, 4))
 
     def spatial_pyramid_pool(self,previous_conv, num_sample, previous_conv_size, out_pool_size):
         '''
