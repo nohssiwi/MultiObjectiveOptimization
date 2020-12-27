@@ -77,24 +77,7 @@ class TENCENT(data.Dataset):
         # get width and height of image
         width = img.size[0]
         height = img.size[1]
-        # if (width > height) :
-        #     crop = transforms.RandomCrop((200, 400))
-        # else :
-        #     crop = transforms.RandomCrop((400, 200))
-        # (454, 984)
-        # (256, 554)
-        # 225 487
-        _h = 225
-        _w = 487
-        resize = transforms.Resize(_h)
-        img = resize(img)
-        w = img.size[0]
-        h = img.size[1]
-        if (w > h) :
-            padding = (math.ceil((_w-w) / 2), 0, math.floor((_w-w) / 2), 0)
-        else :
-            padding = (0, math.ceil((_w-h) / 2), 0, math.floor((_w-h) / 2))
-        pad = transforms.Pad(padding, fill=0, padding_mode='constant')
+        
         crop = transforms.RandomCrop(128)
         
         # extract patches of image
@@ -115,11 +98,7 @@ class TENCENT(data.Dataset):
             image = patches
         else :
             toTensor = transforms.ToTensor()
-            img = pad(img)
             img = toTensor(img)
-            if (h < w) :
-                img = img.permute(0, 2, 1)
-            # image = torch.from_numpy(img).float()
             image = img
 
         return image
