@@ -141,7 +141,7 @@ class TencentDecoder(nn.Module):
         super(TencentDecoder, self).__init__()
         self.patch_size = patch_size
         self.dropout = nn.Dropout(p=0.75)
-        self.fc = nn.Linear(10752, 5)
+        self.fc = nn.Linear(8192, 5)
         self.s = nn.Softmax(dim=1)
 
     def aggragate(self, patches) :
