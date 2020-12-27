@@ -98,6 +98,7 @@ class TENCENT(data.Dataset):
         if (width < height) :
             patches = patches.transpose(0, 1, 3, 2)
 
+        patches = image
         return image
 
 
