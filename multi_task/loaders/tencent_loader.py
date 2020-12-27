@@ -83,7 +83,7 @@ class TENCENT(data.Dataset):
         for i in range(0, self.patch_size) :   
             patch = crop(img)
             patch = toTensor(patch)
-            patches = patches.append(patch)
+            patches.append(patch)
         patches = torch.stack(patches)
         image = patches
         return image
