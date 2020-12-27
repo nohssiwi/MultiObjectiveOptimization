@@ -50,10 +50,11 @@ def get_model(params):
 
     if 'tencent' in data:
         model = {}
-        model['rep'] = ResNet(BasicBlock, [2,2,2,2], params['patch_size'])
+        # model['rep'] = ResNet(BasicBlock, [2,2,2,2])
+        model['rep'] = TencentEncoder()
         model['rep'].cuda()
         for t in params['tasks']:
-            model[t] = TencentDecoder(params['batch_size'], params['patch_size'])
+            model[t] = TencentDecoder(params['patch_size'])
             model[t].cuda()
         return model
 

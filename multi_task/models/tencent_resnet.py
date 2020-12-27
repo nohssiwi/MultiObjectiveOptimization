@@ -3,6 +3,7 @@
 import torch 
 import torch.nn as nn
 import torch.nn.functional as F
+from torchvision import models
 
 import math
 
@@ -59,7 +60,7 @@ class Bottleneck(nn.Module):
         return out
 
 class ResNet(nn.Module):
-    def __init__(self, block, num_blocks, patch_size, num_classes=10):
+    def __init__(self, block, num_blocks, num_classes=10):
         super(ResNet, self).__init__()
         self.in_planes = 64
         self.conv1 = nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=False)
@@ -69,7 +70,6 @@ class ResNet(nn.Module):
         self.layer3 = self._make_layer(block, 256, num_blocks[2], stride=2)
         self.layer4 = self._make_layer(block, 512, num_blocks[3], stride=2)
         #self.linear = nn.Linear(512*block.expansion, num_classes)
-        self.patch_size = patch_size
 
     def _make_layer(self, block, planes, num_blocks, stride):
         strides = [stride] + [1]*(num_blocks-1)
@@ -117,10 +117,50 @@ class ResNet(nn.Module):
         return out, mask
 
 
+class TencentEncoder(nn.Module) :
+    def __init__(self) :
+        super(TencentEncoder, self).__init__()
+        self.model = models.resnet18(pretrained=True)
+
+    def spatial_pyramid_pool(self,previous_conv, num_sample, previous_conv_size, out_pool_size):
+        '''
+        previous_conv: a tensor vector of previous convolution layer
+        num_sample: an int number of image in the batch
+        previous_conv_size: an int vector [height, width] of the matrix features size of previous convolution layer
+        out_pool_size: a int vector of expected output size of max pooling layer
+        
+        returns: a tensor vector with shape [1 x n] is the concentration of multi-level pooling
+        '''    
+        for i in range(len(out_pool_size)):
+            h_wid = math.ceil(previous_conv_size[0] / out_pool_size[i])
+            w_wid = math.ceil(previous_conv_size[1] / out_pool_size[i])
+            h_pad = math.floor((h_wid*out_pool_size[i] - previous_conv_size[0] + 1)/2)
+            w_pad = math.floor((w_wid*out_pool_size[i] - previous_conv_size[1] + 1)/2)
+            # torch.nn.functional.pad
+            maxpool = nn.MaxPool2d((h_wid, w_wid), stride=(h_wid, w_wid), padding=(h_pad, w_pad))
+            x = maxpool(previous_conv)
+            if(i == 0):
+                spp = x.view(num_sample,-1)
+            else:
+                spp = torch.cat((spp,x.view(num_sample,-1)), 1)
+        return spp
+    
+    def forward(self, x):
+        x = self.model.conv1(x)
+        x = self.model.bn1(x)
+        x = self.model.relu(x)
+        x = self.model.maxpool(x)
+        x = self.model.layer1(x)
+        x = self.model.layer2(x)
+        x = self.model.layer3(x)
+        x = self.model.layer4(x)
+        x = self.model.avgpool(x)
+        x = x.view(x.size(0), x.size(1))
+        return x
+
 class TencentDecoder(nn.Module):
-    def __init__(self, batch_size, patch_size):
+    def __init__(self, patch_size):
         super(TencentDecoder, self).__init__()
-        self.batch_size = batch_size
         self.patch_size = patch_size
         self.dropout = nn.Dropout(p=0.75)
         if(self.patch_size > 0) :
@@ -131,18 +171,7 @@ class TencentDecoder(nn.Module):
 
     def aggragate(self, patches) :
         out = patches.reshape(-1, self.patch_size, 5)
-        out = torch.sum(patches, dim=1) / self.patch_size
-        # aggragate patches
-        # patch_size = self.patch_size
-        # batch_size = int(patches.shape[0] / patch_size)
-        # out = []
-        # for i in range(0, batch_size) :
-        #     dis = patches[i*patch_size]
-        #     for j in range(1, patch_size) :
-        #         dis = dis + patches[i*patch_size+j]
-        #     dis = dis / patch_size
-        #     out.append(dis)
-        # out = torch.stack(out)
+        out = torch.sum(out, dim=1) / self.patch_size
         return out
 
 
