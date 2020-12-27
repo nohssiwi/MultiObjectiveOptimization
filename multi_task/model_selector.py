@@ -3,7 +3,7 @@ from models.segnet import SegnetEncoder, SegnetInstanceDecoder, SegnetSegmentati
 from models.pspnet import SegmentationDecoder, get_segmentation_encoder
 # from models.multi_faces_resnet import ResNet, FaceAttributeDecoder, BasicBlock
 
-from models.tencent_resnet import TencentDecoder, ResNet, BasicBlock
+from models.tencent_resnet import TencentEncoder, TencentDecoder, ResNet, BasicBlock
 
 import torchvision.models as model_collection
 
