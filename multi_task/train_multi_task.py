@@ -249,8 +249,8 @@ def train_multi_task(param_file):
         print('Epoch ended in {}s'.format(end - start))
 
     # test
-    for m in model:
-        model[m].eval()
+    # for m in model:
+    #     model[m].eval()
 
 if __name__ == '__main__':
     train_multi_task()
