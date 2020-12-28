@@ -75,27 +75,24 @@ class TENCENT(data.Dataset):
 
     def transform_img(self, img):
         # get width and height of image
-        # width = img.size[0]
-        # height = img.size[1]
+        width = img.size[0]
+        height = img.size[1]
         _h = 1080
         _w = 2340
         resize = transforms.Resize(_h)
         img = resize(img)
-        w = img.size[0]
-        h = img.size[1]
-        # if (w > h) :
-        padding = (math.ceil((_w-w) / 2), 0, math.floor((_w-w) / 2), 0)
-        # else :
-        #     padding = (0, math.ceil((_w-h) / 2), 0, math.floor((_w-h) / 2))
-        pad = transforms.Pad(padding, fill=0, padding_mode='constant')
+        
         toTensor = transforms.ToTensor()
-
         img = toTensor(img)
-        if (h < w) :
-            img = img.permute(0, 2, 1)
-        img = pad(img)
-        image = img
 
+        if (height > width) :
+            img = img.permute(0, 2, 1)
+        w = img.shape[2]
+        padding = (math.ceil((_w-w) / 2), 0, math.floor((_w-w) / 2), 0)
+        pad = transforms.Pad(padding, fill=0, padding_mode='constant')
+        img = pad(img)
+        
+        image = img
         return image
 
 
