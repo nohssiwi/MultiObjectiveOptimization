@@ -94,24 +94,24 @@ class TENCENT(data.Dataset):
         # get width and height of image
         width = img.size[0]
         height = img.size[1]
-        # transform
+        # transform method
+        resize_global = transforms.Resize(self.crop_size)
         resize = transforms.Resize(self.img_h)
         crop = transforms.RandomCrop(self.crop_size)
         toTensor = transforms.ToTensor()
+        # transform
+        img = toTensor(img)
+        # transpose to make sure width > height
+        if (width < height) :
+            img = img.permute(0, 2, 1)
+        # global patch
+        patch_global = resize_global(img)
         img = resize(img)
         # extract patches of image
         patches = []
         for i in range(0, self.patch_size) :  
-            patch = toTensor(img)
-            # transpose to make sure width > height
-            if (width < height) :
-                patch = patch.permute(0, 2, 1)
-            patch = crop(patch)
+            patch = crop(img)
             patches.append(patch)
-        # global patch
-        resize_global = transforms.Resize((self.crop_size))
-        patch_global = resize_global(img)
-        patch_global = toTensor(img)
         patches.append(patch_global)
         patches = torch.stack(patches)
         return patches
