@@ -1,5 +1,4 @@
 {
-    "optimizer": "SGD",
     "img_h": 828,
     "img_w": 1794,
     "batch_size": 8,
@@ -7,8 +6,6 @@
     "lr": 0.001,
     "dataset": "tencent",
     "tasks": ["H", "C", "F", "O"],
-    "normalization_type": "loss+",
-    "algorithm": "mgda",
-    "use_approximation": true,
-    "scales": {"H":0.25, "C":0.25, "F":0.25,  "O":0.25}
+    "optimizer": "SGD",
+    "normalization_type": "loss+"
 }

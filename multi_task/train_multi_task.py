@@ -35,11 +35,9 @@ def train_multi_task(param_file):
     with open(param_file) as json_params:
         params = json.load(json_params)
 
-
     exp_identifier = []
     for (key, val) in params.items():
-        if ('tasks' or 'optimizer' or 'dataset' or 'normalization_type' 
-            or 'algorithm' or 'use_approximation' or 'scales')  in key:
+        if ('tasks' or 'optimizer' or 'dataset' or 'normalization_type')  in key:
             continue
         exp_identifier+= ['{}={}'.format(key,val)]
 
@@ -48,7 +46,7 @@ def train_multi_task(param_file):
 
     writer = SummaryWriter(log_dir='runs/{}_{}'.format(params['exp_id'], datetime.datetime.now().strftime("%I:%M%p on %B %d, %Y")))
 
-    train_loader, train_dst, val_loader, val_dst = datasets.get_dataset(params, configs)
+    train_loader, train_dst, val_loader, val_dst, test_loader, test_dst = datasets.get_dataset(params, configs)
     loss_fn = losses.get_loss(params)
     metric = metrics.get_metrics(params)
 
@@ -68,23 +66,18 @@ def train_multi_task(param_file):
     all_tasks = configs[params['dataset']]['all_tasks']
     print('Starting training with parameters \n \t{} \n'.format(str(params)))
 
-    if 'mgda' in params['algorithm']:
-        approximate_norm_solution = params['use_approximation']
-        if approximate_norm_solution:
-            print('Using approximate min-norm solver')
-        else:
-            print('Using full solver')
     n_iter = 0
     loss_init = {}
     for epoch in tqdm(range(NUM_EPOCHS)):
         start = timer()
         print('Epoch {} Started'.format(epoch))
         if (epoch+1) % 30 == 0:
-            # Every 50 epoch, half the LR
+            # Every 30 epoch, half the LR
             for param_group in optimizer.param_groups:
                 param_group['lr'] *= 0.5
-            print('Half the learning rate{}'.format(n_iter))
+            print('Half the learning rate {}'.format(n_iter))
 
+        # train
         for m in model:
             model[m].train()
 
@@ -109,70 +102,37 @@ def train_multi_task(param_file):
             scale = {}
             mask = None
             masks = {}
-            if 'mgda' in params['algorithm']:
-                # Will use our MGDA_UB if approximate_norm_solution is True. Otherwise, will use MGDA
 
-                if approximate_norm_solution:
-                    optimizer.zero_grad()
-                    # First compute representations (z)
-                    with torch.no_grad():
-                        images_volatile = Variable(images.data)
-                    rep, mask = model['rep'](images_volatile, mask)
-                    # As an approximate solution we only need gradients for input
-                    if isinstance(rep, list):
-                        # This is a hack to handle psp-net
-                        rep = rep[0]
-                        rep_variable = [Variable(rep.data.clone(), requires_grad=True)]
-                        list_rep = True
-                    else:
-                        rep_variable = Variable(rep.data.clone(), requires_grad=True)
-                        list_rep = False
+            # use algo MGDA_UB 
+            optimizer.zero_grad()
+            # First compute representations (z)
+            with torch.no_grad():
+                images_volatile = Variable(images.data)
+            rep, mask = model['rep'](images_volatile, mask)
+            # As an approximate solution we only need gradients for input
+            rep_variable = Variable(rep.data.clone(), requires_grad=True)
+            list_rep = False
 
-                    # Compute gradients of each loss function wrt z
-                    for t in tasks:
-                        optimizer.zero_grad()
-                        out_t, masks[t] = model[t](rep_variable, None)
-                        loss = loss_fn[t](out_t, labels[t])
-                        loss_data[t] = loss.item()
-                        loss.backward()
-                        # grads[t] = []
-                        if list_rep:
-                            # grads[t].append(Variable(rep_variable[0].grad.data.clone(), requires_grad=False))
-                            grads[t] = Variable(rep_variable[0].grad.data.clone(), requires_grad=False)
-                            rep_variable[0].grad.data.zero_()
-                        else:
-                            # grads[t].append(Variable(rep_variable.grad.data.clone(), requires_grad=False))
-                            grads[t] = Variable(rep_variable.grad.data.clone(), requires_grad=False)
-                            rep_variable.grad.data.zero_()
-                else:
-                    # This is MGDA
-                    for t in tasks:
-                        # Comptue gradients of each loss function wrt parameters
-                        optimizer.zero_grad()
-                        rep, mask = model['rep'](images, mask)
-                        out_t, masks[t] = model[t](rep, None)
-                        loss = loss_fn[t](out_t, labels[t])
-                        loss_data[t] = loss.item()
-                        loss.backward()
-                        grads[t] = []
-                        for param in model['rep'].parameters():
-                            if param.grad is not None:
-                                grads[t].append(Variable(param.grad.data.clone(), requires_grad=False))
+            # Compute gradients of each loss function wrt z
+            for t in tasks:
+                optimizer.zero_grad()
+                out_t, masks[t] = model[t](rep_variable, None)
+                loss = loss_fn[t](out_t, labels[t])
+                loss_data[t] = loss.item()
+                loss.backward()
+                grads[t] = Variable(rep_variable.grad.data.clone(), requires_grad=False)
+                rep_variable.grad.data.zero_()
 
-                # Normalize all gradients, this is optional and not included in the paper.
-                gn = gradient_normalizers(grads, loss_data, params['normalization_type'])
-                for t in tasks:
-                    for gr_i in range(len(grads[t])):
-                        grads[t][gr_i] = grads[t][gr_i] / gn[t]
+            # Normalize all gradients, this is optional and not included in the paper.
+            gn = gradient_normalizers(grads, loss_data, params['normalization_type'])
+            for t in tasks:
+                for gr_i in range(len(grads[t])):
+                    grads[t][gr_i] = grads[t][gr_i] / gn[t]
 
-                # Frank-Wolfe iteration to compute scales.
-                sol, min_norm = MinNormSolver.find_min_norm_element([grads[t] for t in tasks])
-                for i, t in enumerate(tasks):
-                    scale[t] = float(sol[i])
-            else:
-                for t in tasks:
-                    masks[t] = None
-                    scale[t] = float(params['scales'][t])
+            # Frank-Wolfe iteration to compute scales.
+            sol, min_norm = MinNormSolver.find_min_norm_element([grads[t] for t in tasks])
+            for i, t in enumerate(tasks):
+                scale[t] = float(sol[i])
 
             # Scaled back-propagation
             optimizer.zero_grad()
@@ -191,7 +151,8 @@ def train_multi_task(param_file):
             writer.add_scalar('training_loss', loss.item(), n_iter)
             for t in tasks:
                 writer.add_scalar('training_loss_{}'.format(t), loss_data[t], n_iter)
-
+        
+        # validation
         for m in model:
             model[m].eval()
 
@@ -230,9 +191,11 @@ def train_multi_task(param_file):
             metric_str = 'task_{} : '.format(t)
             for metric_key in metric_results:
                 writer.add_scalar('metric_{}_{}'.format(metric_key, t), metric_results[metric_key], n_iter)
-                metric_str += '{} = {}\t'.format(metric_key, metric_results[metric_key])
+                metric_str += '{} = {}  '.format(metric_key, metric_results[metric_key])
             metric[t].reset()
+            metric_str += 'loss = {}'.format(tot_loss[t]/num_val_batches)
             print(metric_str)
+        print('all loss = {}'.format(tot_loss['all']/len(val_dst)))
         writer.add_scalar('validation_loss', tot_loss['all']/len(val_dst), n_iter)
 
         if epoch % 3 == 0:
@@ -248,6 +211,50 @@ def train_multi_task(param_file):
 
         end = timer()
         print('Epoch ended in {}s'.format(end - start))
+
+    # test
+    for m in model:
+        model[m].eval()
+    
+    test_tot_loss = {}
+    test_tot_loss['all'] = 0.0
+    test_met = {}
+    for t in tasks:
+        test_tot_loss[t] = 0.0
+        test_met[t] = 0.0
+
+    num_test_batches = 0
+    for batch_test in test_loader:
+        with torch.no_grad():
+            test_images = Variable(batch_test[0].cuda())
+        labels_test = {}
+
+        for i, t in enumerate(all_tasks):
+            if t not in tasks:
+                continue
+            labels_test[t] = batch_test[i+1]
+            with torch.no_grad():
+                labels_test[t] = Variable(labels_test[t].cuda())
+
+        test_rep, _ = model['rep'](test_images, None)
+        for t in tasks:
+            out_t_test, _ = model[t](test_rep, None)
+            test_loss_t = loss_fn[t](out_t_test, labels_test[t])
+            test_tot_loss['all'] += test_loss_t.item()
+            test_tot_loss[t] += test_loss_t.item()
+            metric[t].update(out_t_test, labels_test[t])
+        num_test_batches+=1
+
+    print('test:')
+    for t in tasks:
+        test_metric_results = metric[t].get_result()
+        test_metric_str = 'task_{} : '.format(t)
+        for metric_key in test_metric_results:
+            test_metric_str += '{} = {}  '.format(metric_key, test_metric_results[metric_key])
+        metric[t].reset()
+        test_metric_str += 'loss = {}'.format(test_tot_loss[t]/num_test_batches)
+        print(test_metric_str)
+    print('all loss = {}'.format(test_tot_loss['all']/len(test_dst)))
 
 
 if __name__ == '__main__':

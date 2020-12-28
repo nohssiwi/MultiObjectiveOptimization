@@ -1,16 +1,10 @@
 import torch
-import glob
-import csv
-import scipy.misc as m
-import numpy as np
+from torch.utils import data
 import torchvision.transforms as transforms
+import numpy as np
 import pandas as pd
 import math
 from PIL import Image
-
-
-from torch.utils import data
-
 
 class TENCENT(data.Dataset):
     def __init__(self, root, type, patch_size, img_h, img_w, is_transform = True):
@@ -96,10 +90,10 @@ class TENCENT(data.Dataset):
         return image
 
 
-if __name__ == '__main__':
+# if __name__ == '__main__':
     
-    local_path = '../../Qomex_2020_mobile_game_imges'
-    tencent = TENCENT(local_path, type = 'train')
-    print(tencent[0])
-    trainloader = data.DataLoader(tencent, batch_size=4, num_workers=0)
+#     local_path = '../../Qomex_2020_mobile_game_imges'
+#     tencent = TENCENT(local_path, type = 'train')
+#     print(tencent[0])
+#     trainloader = data.DataLoader(tencent, batch_size=4, num_workers=0)
     # print(trainloader)
