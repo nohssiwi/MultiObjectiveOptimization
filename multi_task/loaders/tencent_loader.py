@@ -109,7 +109,7 @@ class TENCENT(data.Dataset):
             patch = crop(patch)
             patches.append(patch)
         # global patch
-        resize_global = transform.Resize((self.crop_size))
+        resize_global = transforms.Resize((self.crop_size))
         patch_global = resize_global(img)
         patches.append(patch_global)
         patches = torch.stack(patches)
