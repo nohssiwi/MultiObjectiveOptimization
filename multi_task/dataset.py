@@ -3,13 +3,11 @@ from loaders.tencent_loader import TENCENT
 
 
 def multi_patch_collate(batch):
-    data  = []
-    for item in batch :
-        patches = item[0]
-        for patch in patches :
-            data.append(patch)
-    data = np.array(data)
-    data = torch.from_numpy(data).float()
+    for i, item in enumerate(batch) :
+        if (i==0) :
+            data = item[0]
+        else :
+            data = torch.cat((data, item[0]), 0)
     h = [item[1] for item in batch]
     h = torch.stack(h)
     c = [item[2] for item in batch]
