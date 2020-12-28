@@ -7,7 +7,7 @@ import math
 from PIL import Image
 
 class TENCENT(data.Dataset):
-    def __init__(self, root, type, patch_size, img_h, img_w, is_transform=True):
+    def __init__(self, root, type, patch_size, img_h, img_w, crop_size, is_transform=True):
         self.root = root
         self.type = type
         self.is_transform = is_transform
@@ -15,6 +15,7 @@ class TENCENT(data.Dataset):
         self.patch_size = patch_size
         self.img_h = img_h
         self.img_w = img_w
+        self.crop_size = crop_size
 
         data = pd.read_csv(root + '/subjective_scores_v2/all.csv')
 
@@ -64,7 +65,10 @@ class TENCENT(data.Dataset):
         img = Image.open(self.root + '/original_images/' + filename).convert('RGB')
     
         if self.is_transform :
-            img = self.transform_img(img)
+            if (self.patch_size > 0) :
+                img = self.transform_img_mp(img)
+            else :
+                img = self.transform_img(img)
 
         return img, label_h, label_c, label_f, label_o
 
@@ -73,18 +77,36 @@ class TENCENT(data.Dataset):
         # get width and height of image
         width = img.size[0]
         height = img.size[1]
+        # transform
         resize = transforms.Resize(self.img_h)
-        img = resize(img)
-        
         toTensor = transforms.ToTensor()
+        img = resize(img)
         img = toTensor(img)
-
-        if (height > width) :
+        if (width < height) :
             img = img.permute(0, 2, 1)
         w = img.shape[2]
         padding = (math.ceil((img_w-w) / 2), 0, math.floor((img_w-w) / 2), 0)
         pad = transforms.Pad(padding, fill=0, padding_mode='constant')
         img = pad(img)
-        
-        image = img
-        return image
+        return img
+
+    def transform_img_mp(self, img):
+        # get width and height of image
+        width = img.size[0]
+        height = img.size[1]
+        # transform
+        resize = transforms.Resize(self.img_h)
+        crop = transforms.RandomCrop(self.crop_size)
+        toTensor = transforms.ToTensor()
+        img = resize(img)
+        # extract patches of image
+        patches = []
+        for i in range(0, self.patch_size) :  
+            patch = toTensor(img)
+            # transpose to make sure width > height
+            if (width < height) :
+                patch = patch.permute(0, 2, 1)
+            patch = crop(patch)
+            patches.append(patch)
+        patches = torch.stack(patches)
+        return patches

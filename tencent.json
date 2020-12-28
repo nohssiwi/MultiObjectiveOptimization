@@ -1,6 +1,8 @@
 {
     "img_h": 828,
     "img_w": 1794,
+    "crop_h": 0,
+    "crop_w": 0,
     "batch_size": 8,
     "patch_size": 0,
     "lr": 0.001,
