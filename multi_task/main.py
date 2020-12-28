@@ -10,10 +10,10 @@ from torch.utils import data
 from tqdm import tqdm
 from tensorboardX import SummaryWriter
 
-import losses
-import datasets
+import loss
+import dataset
 import metrics
-import models
+import model as model_selector
 from min_norm_solvers import MinNormSolver, gradient_normalizers
 
 NUM_EPOCHS = 100
@@ -39,7 +39,7 @@ def train_multi_task(param_file):
     writer = SummaryWriter(log_dir='runs/{}_{}'.format(params['exp_id'], datetime.datetime.now().strftime("%I:%M%p on %B %d, %Y")))
 
     train_loader, train_dst, val_loader, val_dst, test_loader, test_dst = datasets.get_dataset(params, configs)
-    loss_fn = losses.get_loss(params)
+    loss_fn = loss.get_loss(params)
     metric = metrics.get_metrics(params)
 
     model = model_selector.get_model(params)
