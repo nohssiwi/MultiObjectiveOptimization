@@ -29,7 +29,7 @@ def train_multi_task(param_file):
 
     exp_identifier = []
     for (key, val) in params.items():
-        if ('tasks' or 'optimizer' or 'dataset' or 'normalization_type')  in key:
+        if ('tasks' in key) or ('optimizer' in key) or ('normalization_type' in key):
             continue
         exp_identifier+= ['{}={}'.format(key,val)]
 
@@ -205,48 +205,48 @@ def train_multi_task(param_file):
         print('Epoch ended in {}s'.format(end - start))
 
     # test
-    for m in model:
-        model[m].eval()
+    # for m in model:
+    #     model[m].eval()
     
-    test_tot_loss = {}
-    test_tot_loss['all'] = 0.0
-    test_met = {}
-    for t in tasks:
-        test_tot_loss[t] = 0.0
-        test_met[t] = 0.0
+    # test_tot_loss = {}
+    # test_tot_loss['all'] = 0.0
+    # test_met = {}
+    # for t in tasks:
+    #     test_tot_loss[t] = 0.0
+    #     test_met[t] = 0.0
 
-    num_test_batches = 0
-    for batch_test in test_loader:
-        with torch.no_grad():
-            test_images = Variable(batch_test[0].cuda())
-        labels_test = {}
+    # num_test_batches = 0
+    # for batch_test in test_loader:
+    #     with torch.no_grad():
+    #         test_images = Variable(batch_test[0].cuda())
+    #     labels_test = {}
 
-        for i, t in enumerate(all_tasks):
-            if t not in tasks:
-                continue
-            labels_test[t] = batch_test[i+1]
-            with torch.no_grad():
-                labels_test[t] = Variable(labels_test[t].cuda())
+    #     for i, t in enumerate(all_tasks):
+    #         if t not in tasks:
+    #             continue
+    #         labels_test[t] = batch_test[i+1]
+    #         with torch.no_grad():
+    #             labels_test[t] = Variable(labels_test[t].cuda())
 
-        test_rep, _ = model['rep'](test_images, None)
-        for t in tasks:
-            out_t_test, _ = model[t](test_rep, None)
-            test_loss_t = loss_fn[t](out_t_test, labels_test[t])
-            test_tot_loss['all'] += test_loss_t.item()
-            test_tot_loss[t] += test_loss_t.item()
-            metric[t].update(out_t_test, labels_test[t])
-        num_test_batches+=1
+    #     test_rep, _ = model['rep'](test_images, None)
+    #     for t in tasks:
+    #         out_t_test, _ = model[t](test_rep, None)
+    #         test_loss_t = loss_fn[t](out_t_test, labels_test[t])
+    #         test_tot_loss['all'] += test_loss_t.item()
+    #         test_tot_loss[t] += test_loss_t.item()
+    #         metric[t].update(out_t_test, labels_test[t])
+    #     num_test_batches+=1
 
-    print('test:')
-    for t in tasks:
-        test_metric_results = metric[t].get_result()
-        test_metric_str = 'task_{} : '.format(t)
-        for metric_key in test_metric_results:
-            test_metric_str += '{} = {}  '.format(metric_key, test_metric_results[metric_key])
-        metric[t].reset()
-        test_metric_str += 'loss = {}'.format(test_tot_loss[t]/num_test_batches)
-        print(test_metric_str)
-    print('all loss = {}'.format(test_tot_loss['all']/len(test_dst)))
+    # print('test:')
+    # for t in tasks:
+    #     test_metric_results = metric[t].get_result()
+    #     test_metric_str = 'task_{} : '.format(t)
+    #     for metric_key in test_metric_results:
+    #         test_metric_str += '{} = {}  '.format(metric_key, test_metric_results[metric_key])
+    #     metric[t].reset()
+    #     test_metric_str += 'loss = {}'.format(test_tot_loss[t]/num_test_batches)
+    #     print(test_metric_str)
+    # print('all loss = {}'.format(test_tot_loss['all']/len(test_dst)))
 
 
 if __name__ == '__main__':
