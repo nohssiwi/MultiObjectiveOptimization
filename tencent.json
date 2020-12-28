@@ -1,5 +1,7 @@
 {
     "optimizer": "SGD",
+    "img_h": 828,
+    "img_w": 1794,
     "batch_size": 8,
     "patch_size": 0,
     "lr": 0.001,

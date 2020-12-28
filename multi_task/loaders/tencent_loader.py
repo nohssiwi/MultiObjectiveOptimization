@@ -13,12 +13,14 @@ from torch.utils import data
 
 
 class TENCENT(data.Dataset):
-    def __init__(self, root, type, patch_size, is_transform = True):
+    def __init__(self, root, type, patch_size, img_h, img_w, is_transform = True):
         self.root = root
         self.type = type
         self.is_transform = is_transform
         # self.augmentations = augmentations
         self.patch_size = patch_size
+        self.img_h = img_h
+        self.img_w = img_w
 
         data = pd.read_csv(root + '/subjective_scores_v2/all.csv')
 
@@ -77,9 +79,7 @@ class TENCENT(data.Dataset):
         # get width and height of image
         width = img.size[0]
         height = img.size[1]
-        _h = 1080
-        _w = 2340
-        resize = transforms.Resize(_h)
+        resize = transforms.Resize(self.img_h)
         img = resize(img)
         
         toTensor = transforms.ToTensor()
@@ -88,7 +88,7 @@ class TENCENT(data.Dataset):
         if (height > width) :
             img = img.permute(0, 2, 1)
         w = img.shape[2]
-        padding = (math.ceil((_w-w) / 2), 0, math.floor((_w-w) / 2), 0)
+        padding = (math.ceil((img_w-w) / 2), 0, math.floor((img_w-w) / 2), 0)
         pad = transforms.Pad(padding, fill=0, padding_mode='constant')
         img = pad(img)
         
