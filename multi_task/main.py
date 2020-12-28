@@ -38,7 +38,7 @@ def train_multi_task(param_file):
 
     writer = SummaryWriter(log_dir='runs/{}_{}'.format(params['exp_id'], datetime.datetime.now().strftime("%I:%M%p on %B %d, %Y")))
 
-    train_loader, train_dst, val_loader, val_dst, test_loader, test_dst = datasets.get_dataset(params, configs)
+    train_loader, train_dst, val_loader, val_dst, test_loader, test_dst = dataset.get_dataset(params, configs)
     loss_fn = loss.get_loss(params)
     metric = metrics.get_metrics(params)
 
