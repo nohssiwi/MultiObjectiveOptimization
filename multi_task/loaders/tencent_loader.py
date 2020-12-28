@@ -7,7 +7,7 @@ import math
 from PIL import Image
 
 class TENCENT(data.Dataset):
-    def __init__(self, root, type, patch_size, img_h, img_w, is_transform = True):
+    def __init__(self, root, type, patch_size, img_h, img_w, is_transform=True):
         self.root = root
         self.type = type
         self.is_transform = is_transform
@@ -88,12 +88,3 @@ class TENCENT(data.Dataset):
         
         image = img
         return image
-
-
-# if __name__ == '__main__':
-    
-#     local_path = '../../Qomex_2020_mobile_game_imges'
-#     tencent = TENCENT(local_path, type = 'train')
-#     print(tencent[0])
-#     trainloader = data.DataLoader(tencent, batch_size=4, num_workers=0)
-    # print(trainloader)

@@ -2,7 +2,7 @@ import torch
 from loaders.tencent_loader import TENCENT
 
 
-def my_collate(batch):
+def multi_patch_collate(batch):
     data  = []
     for item in batch :
         patches = item[0]
@@ -29,9 +29,9 @@ def get_dataset(params, configs):
         val_dst = TENCENT(root=configs['tencent']['path'], is_transform=True, type='val', patch_size=params['patch_size'], img_h=params['img_h'], img_w=params['img_w'])
         test_dst = TENCENT(root=configs['tencent']['path'], is_transform=True, type='test', patch_size=params['patch_size'], img_h=params['img_h'], img_w=params['img_w'])
         if (params['patch_size'] > 0) :
-            train_loader = torch.utils.data.DataLoader(train_dst, batch_size = params['batch_size'], shuffle=True, num_workers=4, collate_fn=my_collate)
-            val_loader = torch.utils.data.DataLoader(val_dst, batch_size = params['batch_size'], num_workers=4, collate_fn=my_collate)
-            test_loader = torch.utils.data.DataLoader(test_dst, batch_size = params['batch_size'], num_workers=4, collate_fn=my_collate)
+            train_loader = torch.utils.data.DataLoader(train_dst, batch_size=params['batch_size'], shuffle=True, num_workers=4, collate_fn=multi_patch_collate)
+            val_loader = torch.utils.data.DataLoader(val_dst, batch_size=params['batch_size'], num_workers=4, collate_fn=multi_patch_collate)
+            test_loader = torch.utils.data.DataLoader(test_dst, batch_size=params['batch_size'], num_workers=4, collate_fn=multi_patch_collate)
         else :
             train_loader = torch.utils.data.DataLoader(train_dst, batch_size=params['batch_size'], shuffle=True, num_workers=4)
             val_loader = torch.utils.data.DataLoader(val_dst, batch_size=params['batch_size'], num_workers=4)

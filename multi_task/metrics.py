@@ -1,21 +1,13 @@
-# Adapted from: https://github.com/meetshah1995/pytorch-semseg/blob/master/ptsemseg/metrics.py
-
 import numpy as np
 from scipy import stats
 
 class RunningMetric(object):
-    def __init__(self, metric_type, n_classes =None):
+    def __init__(self, metric_type):
         self._metric_type = metric_type
         if self._metric_type == 'MULTI':
             # MSE SPCC PCC ACC
             self.gt = []
-            self.pred = []
-
-    def reset(self):
-        if self._metric_type == 'MULTI':
-            # MSE SPCC PCC ACC_DIS
-            self.gt = []
-            self.pred = []
+            self.pred = [] 
 
     def calculate_score(self, dis):
         weights = np.array([1, 2, 3, 4 ,5])
@@ -29,6 +21,11 @@ class RunningMetric(object):
         gt_ge_3 = gt >= 3
         return np.sum(pred_ge_3 ==  gt_ge_3) / pred.shape[0]
 
+    def reset(self):
+        if self._metric_type == 'MULTI':
+            # MSE SPCC PCC ACC
+            self.gt = []
+            self.pred = []
 
     def update(self, pred, gt):
         if self._metric_type == 'MULTI':
@@ -53,5 +50,5 @@ def get_metrics(params):
     met = {}
     if 'tencent' in params['dataset']:
         for t in params['tasks']:
-            met[t] = RunningMetric(metric_type = 'MULTI')
+            met[t] = RunningMetric(metric_type='MULTI')
     return met

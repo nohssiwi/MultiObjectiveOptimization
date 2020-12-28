@@ -1,19 +1,11 @@
-import sys
-import torch
 import click
 import json
 import datetime
 from timeit import default_timer as timer
 
-import numpy as np
-
 import torch
-import torch.nn as nn
-import torch.nn.functional as F
 from torch.autograd import Variable
 from torch.utils import data
-import torchvision
-import types
 
 from tqdm import tqdm
 from tensorboardX import SummaryWriter
@@ -21,7 +13,7 @@ from tensorboardX import SummaryWriter
 import losses
 import datasets
 import metrics
-import model_selector
+import models
 from min_norm_solvers import MinNormSolver, gradient_normalizers
 
 NUM_EPOCHS = 100

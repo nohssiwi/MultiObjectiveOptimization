@@ -1,5 +1,5 @@
 
-from models.tencent_resnet import TencentEncoder, TencentDecoder
+from models.tencent_model import TencentEncoder, TencentDecoder
 
 def get_model(params):
     data = params['dataset']
