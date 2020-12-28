@@ -85,7 +85,7 @@ class TENCENT(data.Dataset):
         if (width < height) :
             img = img.permute(0, 2, 1)
         w = img.shape[2]
-        padding = (math.ceil((img_w-w) / 2), 0, math.floor((img_w-w) / 2), 0)
+        padding = (math.ceil((self.img_w-w) / 2), 0, math.floor((self.img_w-w) / 2), 0)
         pad = transforms.Pad(padding, fill=0, padding_mode='constant')
         img = pad(img)
         return img
