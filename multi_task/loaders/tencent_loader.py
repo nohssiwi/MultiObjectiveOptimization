@@ -111,6 +111,7 @@ class TENCENT(data.Dataset):
         # global patch
         resize_global = transforms.Resize((self.crop_size))
         patch_global = resize_global(img)
+        patch_global = toTensor(img)
         patches.append(patch_global)
         patches = torch.stack(patches)
         return patches
