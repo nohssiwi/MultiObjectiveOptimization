@@ -1,11 +1,13 @@
 import numpy as np
 from scipy import stats
+from sklearn.metrics import mean_squared_error
+from math import sqrt
 
 class RunningMetric(object):
     def __init__(self, metric_type):
         self._metric_type = metric_type
         if self._metric_type == 'MULTI':
-            # MSE SPCC PCC ACC
+            # RMSE SPCC PCC ACC
             self.gt = []
             self.pred = [] 
 
@@ -13,8 +15,16 @@ class RunningMetric(object):
         weights = np.array([1, 2, 3, 4 ,5])
         return np.sum(dis * weights, axis=1)
 
-    def MSE(self, pred, gt):
-        return np.square(pred - gt).mean()
+    # def MSE(self, pred, gt):
+    #     return np.square(pred - gt).mean()
+    
+    # def RMSE(self, pred, gt):
+    #     rmse = sqrt(MSE(pred, gt))
+    #     return rmse 
+    
+    def RMSE(self, pred, gt):
+        rmse = sqrt(mean_squared_error(pred, gt))
+        return rmse  
 
     def accuracy(self, pred, gt):
         pred_ge_3 = pred >= 3
@@ -23,7 +33,7 @@ class RunningMetric(object):
 
     def reset(self):
         if self._metric_type == 'MULTI':
-            # MSE SPCC PCC ACC
+            # RMSE SPCC PCC ACC
             self.gt = []
             self.pred = []
 
@@ -40,7 +50,7 @@ class RunningMetric(object):
             pred = np.array(self.pred)
             gt = np.array(self.gt)
             return {
-                'mse': self.MSE(pred, gt),
+                'rmse': self.RMSE(pred, gt),
                 'spcc': stats.spearmanr(pred, gt)[0],
                 'plcc': stats.pearsonr(pred, gt)[0],
                 'acc': self.accuracy(pred, gt)

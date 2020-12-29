@@ -27,7 +27,7 @@ def spatial_pyramid_pool(self,previous_conv, num_sample, previous_conv_size, out
 class TencentEncoder(nn.Module) :
     def __init__(self) :
         super(TencentEncoder, self).__init__()
-        self.model = models.resnet50(pretrained=True)
+        self.model = models.resnet18(pretrained=True)
         self.model.avgpool = nn.AdaptiveAvgPool2d((4, 4))
     
     def forward(self, x, mask):
@@ -46,10 +46,10 @@ class TencentEncoder(nn.Module) :
 class TencentDecoder(nn.Module):
     def __init__(self, patch_size):
         super(TencentDecoder, self).__init__()
-        self.patch_size = patch_size
+        self.patch_size = patch_size + 1
         self.dropout = nn.Dropout(p=0.75)
-        # self.fc = nn.Linear(8192, 5)
-        self.fc = nn.Linear(32768, 5)# resnet50
+        self.fc = nn.Linear(8192, 5)# resnet18
+        # self.fc = nn.Linear(32768, 5)# resnet50
         self.s = nn.Softmax(dim=1)
 
     def aggragate(self, patches) :
