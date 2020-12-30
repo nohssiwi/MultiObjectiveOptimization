@@ -8,7 +8,7 @@ def get_model(params):
         model['rep'] = TencentEncoder()
         model['rep'].cuda()
         for t in params['tasks']:
-            model[t] = TencentDecoder(params['patch_size'])
+            model[t] = TencentDecoder(params['patch_size'], params['dropout_prob'])
             model[t].cuda()
         return model
 

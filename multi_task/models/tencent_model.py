@@ -44,10 +44,10 @@ class TencentEncoder(nn.Module) :
         return x, mask
 
 class TencentDecoder(nn.Module):
-    def __init__(self, patch_size):
+    def __init__(self, patch_size, prob=0.75):
         super(TencentDecoder, self).__init__()
         self.patch_size = patch_size + 1
-        self.dropout = nn.Dropout(p=0.75)
+        self.dropout = nn.Dropout(prob)
         self.fc = nn.Linear(8192, 5)# resnet18
         # self.fc = nn.Linear(32768, 5)# resnet50
         self.s = nn.Softmax(dim=1)

@@ -7,7 +7,7 @@ import math
 from PIL import Image
 
 class TENCENT(data.Dataset):
-    def __init__(self, root, type, patch_size, img_h, img_w, crop_size, is_transform=True):
+    def __init__(self, root, type, patch_size, global_patch, crop_or_pad, img_h, img_w, crop_size, is_transform=True):
         self.root = root
         self.type = type
         self.is_transform = is_transform
@@ -16,6 +16,8 @@ class TENCENT(data.Dataset):
         self.img_h = img_h
         self.img_w = img_w
         self.crop_size = crop_size
+        self.global_patch = global_patch
+        self.crop_or_pad = crop_or_pad
 
         data = pd.read_csv(root + '/subjective_scores_v2/all.csv')
 
@@ -80,14 +82,22 @@ class TENCENT(data.Dataset):
         # transform
         resize = transforms.Resize(self.img_h)
         toTensor = transforms.ToTensor()
+        flip = transforms.RandomHorizontalFlip()
         img = resize(img)
         img = toTensor(img)
         if (width < height) :
             img = img.permute(0, 2, 1)
-        w = img.shape[2]
-        padding = (math.ceil((self.img_w-w) / 2), 0, math.floor((self.img_w-w) / 2), 0)
-        pad = transforms.Pad(padding, fill=0, padding_mode='constant')
-        img = pad(img)
+        if (crop_or_pad == 0) :
+            # cropping
+            img = transforms.functional.center_crop(img, (self.img_h, self.img_w))
+        else :
+            # padding
+            w = img.shape[2]
+            padding = (math.ceil((self.img_w-w) / 2), 0, math.floor((self.img_w-w) / 2), 0)
+            pad = transforms.Pad(padding, fill=0, padding_mode='constant')
+            img = pad(img)
+        if (self.type == 'train') :
+            img = flip(img)
         return img
 
     def transform_img_mp(self, img):
@@ -99,19 +109,24 @@ class TENCENT(data.Dataset):
         resize = transforms.Resize(self.img_h)
         crop = transforms.RandomCrop(self.crop_size)
         toTensor = transforms.ToTensor()
+        flip = transforms.RandomHorizontalFlip()
         # transform
         img = toTensor(img)
         # transpose to make sure width > height
         if (width < height) :
             img = img.permute(0, 2, 1)
         # global patch
-        patch_global = resize_global(img)
+        if (self.global_patch == 1) :
+            patch_global = resize_global(img)
         img = resize(img)
         # extract patches of image
         patches = []
         for i in range(0, self.patch_size) :  
             patch = crop(img)
+            if (self.type == 'train') :
+                patch = flip(img)
             patches.append(patch)
-        patches.append(patch_global)
+        if (self.global_patch == 1) :
+            patches.append(patch_global)
         patches = torch.stack(patches)
         return patches

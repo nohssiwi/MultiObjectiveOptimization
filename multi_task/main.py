@@ -148,7 +148,6 @@ def train_multi_task(param_file):
         for m in model:
             model[m].eval()
 
-        init_val_loss = float('inf')
         tot_loss = {}
         tot_loss['all'] = 0.0
         met = {}
@@ -192,7 +191,9 @@ def train_multi_task(param_file):
         writer.add_scalar('validation_loss', tot_loss['all']/len(val_dst), n_iter)
 
         # Use early stopping to monitor training
+        init_val_loss = float('inf')
         avg_val_loss = tot_loss['all']/len(val_dst)
+        count = 0
         if avg_val_loss < init_val_loss:
             init_val_loss = avg_val_loss
             # save model weights if val loss decreases

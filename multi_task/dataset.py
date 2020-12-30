@@ -24,13 +24,16 @@ def get_dataset(params, configs):
     
     if 'tencent' in params['dataset']:
         train_dst = TENCENT(root=configs['tencent']['path'], is_transform=True, type='train', 
-            patch_size=params['patch_size'], img_h=params['img_h'], img_w=params['img_w'], 
+            patch_size=params['patch_size'], global_patch=params['global_patch'], crop_or_pad=params['crop_or_pad'], 
+            img_h=params['img_h'], img_w=params['img_w'], 
             crop_size=(params['crop_h'], params['crop_w']))
         val_dst = TENCENT(root=configs['tencent']['path'], is_transform=True, type='val', 
-            patch_size=params['patch_size'], img_h=params['img_h'], img_w=params['img_w'],
+            patch_size=params['patch_size'], global_patch=params['global_patch'], crop_or_pad=params['crop_or_pad'], 
+            img_h=params['img_h'], img_w=params['img_w'],
             crop_size=(params['crop_h'], params['crop_w']))
         test_dst = TENCENT(root=configs['tencent']['path'], is_transform=True, type='test', 
-            patch_size=params['patch_size'], img_h=params['img_h'], img_w=params['img_w'],
+            patch_size=params['patch_size'], global_patch=params['global_patch'], crop_or_pad=params['crop_or_pad'], 
+            img_h=params['img_h'], img_w=params['img_w'],
             crop_size=(params['crop_h'], params['crop_w']))
         if (params['patch_size'] > 0) :
             train_loader = torch.utils.data.DataLoader(train_dst, batch_size=params['batch_size'], shuffle=True, num_workers=4, collate_fn=multi_patch_collate)
