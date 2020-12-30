@@ -87,7 +87,7 @@ class TENCENT(data.Dataset):
         img = toTensor(img)
         if (width < height) :
             img = img.permute(0, 2, 1)
-        if (crop_or_pad == 0) :
+        if (self.crop_or_pad == 0) :
             # cropping
             img = transforms.functional.center_crop(img, (self.img_h, self.img_w))
         else :
