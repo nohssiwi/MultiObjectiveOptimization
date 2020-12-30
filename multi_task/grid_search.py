@@ -50,6 +50,7 @@ def grid_search() :
                                 params['crop_or_pad'] = cp 
                                 if cp == 0 :
                                     for img_w in [454, 806, 1279] :
+                                        params['img_w'] = img_w
                                         try:
                                             train_multi_task(params)
                                         except RuntimeError as exception:
@@ -62,6 +63,7 @@ def grid_search() :
                                                 continue
                                 else :
                                     for img_w in [554, 984, 1560] :
+                                        params['img_w'] = img_w
                                         try:
                                             train_multi_task(params)
                                         except RuntimeError as exception:

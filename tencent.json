@@ -1,9 +1,9 @@
 {
     "lr": 0.001,
     "dropout_prob": 0.75,
-    "img_h": 720,
-    "img_w": 1560,
-    "batch_size": 6,
+    "img_h": 454,
+    "img_w": 984,
+    "batch_size": 8,
     "crop_or_pad": 1,
     "patch_size": 0,
     "crop_h": 272,
