@@ -148,6 +148,7 @@ def train_multi_task(param_file):
         for m in model:
             model[m].eval()
 
+        init_val_loss = float('inf')
         tot_loss = {}
         tot_loss['all'] = 0.0
         met = {}
@@ -190,8 +191,12 @@ def train_multi_task(param_file):
         print('all loss = {}'.format(tot_loss['all']/len(val_dst)))
         writer.add_scalar('validation_loss', tot_loss['all']/len(val_dst), n_iter)
 
-        if epoch % 3 == 0:
-            # Save after every 3 epoch
+        # Use early stopping to monitor training
+        avg_val_loss = tot_loss['all']/len(val_dst)
+        if avg_val_loss < init_val_loss:
+            init_val_loss = avg_val_loss
+            # save model weights if val loss decreases
+            print('Saving model...')
             state = {'epoch': epoch+1,
                     'model_rep': model['rep'].state_dict(),
                     'optimizer_state' : optimizer.state_dict()}
@@ -200,6 +205,24 @@ def train_multi_task(param_file):
                 state[key_name] = model[t].state_dict()
 
             torch.save(state, "saved_models/{}_{}_model.pkl".format(params['exp_id'], epoch+1))
+            # reset count
+            count = 0
+        elif avg_val_loss >= init_val_loss:
+            count += 1
+            if count == 10:
+                print('Val EMD loss has not decreased in %d epochs. Training terminated.' % 10)
+                break
+
+        # if epoch % 3 == 0:
+        #     # Save after every 3 epoch
+        #     state = {'epoch': epoch+1,
+        #             'model_rep': model['rep'].state_dict(),
+        #             'optimizer_state' : optimizer.state_dict()}
+        #     for t in tasks:
+        #         key_name = 'model_{}'.format(t)
+        #         state[key_name] = model[t].state_dict()
+
+        #     torch.save(state, "saved_models/{}_{}_model.pkl".format(params['exp_id'], epoch+1))
 
         end = timer()
         print('Epoch ended in {}s'.format(end - start))

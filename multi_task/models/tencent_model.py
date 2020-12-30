@@ -57,7 +57,6 @@ class TencentDecoder(nn.Module):
         out = torch.sum(out, dim=1) / self.patch_size
         return out
 
-
     def forward(self, conv_out, mask):
         out = self.dropout(conv_out)
         # print(out.shape)
