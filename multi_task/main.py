@@ -239,9 +239,14 @@ def train_multi_task(params, fold=0):
 
     # test
     if params['test'] :
-        model.load_state_dict(torch.load(os.path.join('./saved_models', "{}_{}_{}_model.pkl".format(params['exp_identifier'], params['best_epoch'], params['best_fold']))))
+        state = torch.load(os.path.join('./saved_models', "{}_{}_{}_model.pkl".format(params['exp_identifier'], params['best_epoch'], params['best_fold'])))
+        model['rep'].load_state_dict(state['model_rep'])
+        for t in tasks :
+            key_name = 'model_{}'.format(t)
+            model[t].load_state_dict(state[key_name])
         print('Successfully loaded model')
-    
+
+
         for m in model:
             model[m].eval()
         
