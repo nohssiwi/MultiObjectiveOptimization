@@ -12,12 +12,12 @@ def _5foldcv() :
         'dropout_prob': 0.75,
         'lr': 0.001,
         'batch_size': 8,
-        'img_h': 720,
-        'img_w': 1560,
-        'patch_size' : 6,
+        'img_h': 454,
+        'img_w': 984,
+        'patch_size' : 8,
         'global_patch': True,
-        'crop_h' : 432,
-        'crop_w' : 936,
+        'crop_h' : 272,
+        'crop_w' : 590,
         'crop_or_pad' : False
     }
 
