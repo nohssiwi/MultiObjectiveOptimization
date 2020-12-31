@@ -18,16 +18,15 @@ from min_norm_solvers import MinNormSolver, gradient_normalizers
 
 NUM_EPOCHS = 100
 
-@click.command()
-@click.option('--param_file', default='params.json', help='JSON parameters file')
-def train_multi_task(param_file):
+# @click.command()
+# @click.option('--param_file', default='params.json', help='JSON parameters file')
+# def train_multi_task(param_file):
+def train_multi_task(params):
     with open('configs.json') as config_params:
         configs = json.load(config_params)
 
     # with open(param_file) as json_params:
     #     params = json.load(json_params)
-
-    params = param_file
 
     exp_identifier = []
     for (key, val) in params.items():
