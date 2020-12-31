@@ -14,11 +14,11 @@ def _5foldcv() :
         'batch_size': 8,
         'img_h': 454,
         'img_w': 984,
-        'patch_size' : 8,
-        'global_patch': True,
+        'patch_size' : 0,
+        'global_patch': False,
         'crop_h' : 256,
         'crop_w' : 256,
-        'crop_or_pad' : False
+        'crop_or_pad' : True
     }
 
     plcc_list = []
