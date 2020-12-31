@@ -157,7 +157,6 @@ def train_multi_task(params):
                         writer.add_scalar('training_metric_{}_{}'.format(metric_key, t), metric_results[metric_key], n_iter)
                         metric_str += '{} = {}  '.format(metric_key, metric_results[metric_key])
                     metric[t].reset()
-                    metric_str += 'loss = {}'.format(tot_loss[t]/num_val_batches)
                     print(metric_str)
                 avg_plcc /= 4
                 avg_plcc_list.append(avg_plcc) 
