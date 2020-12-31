@@ -30,7 +30,17 @@ def grid_search() :
         "normalization_type": "loss+",
         "grid_search": True,
         "train": False,
-        "test": False
+        "test": False,
+        'dropout_prob': 0,
+        'lr': 0.001,
+        'batch_size': 4,
+        'img_h': 225,
+        'img_w': 225,
+        'patch_size' : 0,
+        'global_patch': False,
+        'crop_h' : 0,
+        'crop_w' : 0,
+        'crop_or_pad' : False
     }
     for p in [0.25, 0.5, 0.75] :
         params['dropout_prob'] = p
@@ -43,13 +53,13 @@ def grid_search() :
                     for ps in [0, 6, 7, 8] :
                         params['patch_size'] = ps
                         if (ps > 0) :
-                            for gp in [0, 1] :
+                            for gp in [False, True] :
                                 params['global_patch'] = gp
                                 for cs in [(224, 224), (256, 256), (256,512)] :
                                     params['crop_h'] = cs[0]
                                     params['crop_w'] = cs[1]
                         else :
-                            for cp in [0, 1] :
+                            for cp in [False, True] :
                                 params['crop_or_pad'] = cp 
                                 if cp == 0 :
                                     for img_w in [454, 806, 1279] :

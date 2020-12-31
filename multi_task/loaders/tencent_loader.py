@@ -102,7 +102,7 @@ class TENCENT(data.Dataset):
         img = toTensor(img)
         if (width < height) :
             img = img.permute(0, 2, 1)
-        if (self.crop_or_pad == 0) :
+        if not self.crop_or_pad :
             # cropping
             img = transforms.functional.center_crop(img, (self.img_h, self.img_w))
         else :
@@ -131,7 +131,7 @@ class TENCENT(data.Dataset):
         if (width < height) :
             img = img.permute(0, 2, 1)
         # global patch
-        if (self.global_patch == 1) :
+        if self.global_patch :
             patch_global = resize_global(img)
         img = resize(img)
         # extract patches of image
@@ -141,7 +141,7 @@ class TENCENT(data.Dataset):
             if (self.type == 'train') :
                 patch = flip(img)
             patches.append(patch)
-        if (self.global_patch == 1) :
+        if self.global_patch :
             patches.append(patch_global)
         patches = torch.stack(patches)
         return patches

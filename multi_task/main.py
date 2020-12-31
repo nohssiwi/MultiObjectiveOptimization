@@ -163,7 +163,7 @@ def train_multi_task(params):
                 avg_plcc_list.append(avg_plcc) 
                 
 
-            if params['grid_search'] == False :
+            if not params['grid_search'] :
                 # validation
                 for m in model:
                     model[m].eval()
