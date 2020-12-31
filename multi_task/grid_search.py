@@ -1,8 +1,5 @@
 from main import train_multi_task
 
-def train_multi_task() :
-
-
 def grid_search() :
     ''' 
     hyperparams : 
