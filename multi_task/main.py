@@ -18,15 +18,14 @@ from min_norm_solvers import MinNormSolver, gradient_normalizers
 
 NUM_EPOCHS = 100
 
-# @click.command()
-# @click.option('--param_file', default='params.json', help='JSON parameters file')
-# def train_multi_task(param_file):
-def train_multi_task(params):
+@click.command()
+@click.option('--param_file', default='params.json', help='JSON parameters file')
+def train_multi_task(param_file):
     with open('configs.json') as config_params:
         configs = json.load(config_params)
 
-    # with open(param_file) as json_params:
-    #     params = json.load(json_params)
+    with open(param_file) as json_params:
+        params = json.load(json_params)
 
     exp_identifier = []
     for (key, val) in params.items():
@@ -70,10 +69,9 @@ def train_multi_task(params):
             for param_group in optimizer.param_groups:
                 param_group['lr'] *= 0.5
             print('Half the learning rate {}'.format(n_iter))
-        
+
         # train
-        if params['train'] or params['grid_search']:
-            train_loader, train_dst = dataset_selector.get_dataset(params, configs)
+        if params['train'] :
             for m in model:
                 model[m].train()
 
@@ -137,7 +135,6 @@ def train_multi_task(params):
                     out_t, _ = model[t](rep, masks[t])
                     loss_t = loss_fn[t](out_t, labels[t])
                     loss_data[t] = loss_t.item()
-                    metric[t].update(out_t, labels[t])
                     if i > 0:
                         loss = loss + scale[t]*loss_t
                     else:
@@ -145,93 +142,79 @@ def train_multi_task(params):
                 loss.backward()
                 optimizer.step()
 
-                avg_plcc_list = []
-                avg_plcc = 0
                 writer.add_scalar('training_loss', loss.item(), n_iter)
                 for t in tasks:
                     writer.add_scalar('training_loss_{}'.format(t), loss_data[t], n_iter)
-                    metric_results = metric[t].get_result()
-                    avg_plcc += metric_results['plcc']
-                    metric_str = 'task_{} : '.format(t)
-                    for metric_key in metric_results:
-                        writer.add_scalar('training_metric_{}_{}'.format(metric_key, t), metric_results[metric_key], n_iter)
-                        metric_str += '{} = {}  '.format(metric_key, metric_results[metric_key])
-                    metric[t].reset()
-                    print(metric_str)
-                avg_plcc /= 4
-                avg_plcc_list.append(avg_plcc) 
-                
+            
+            # validation
+            for m in model:
+                model[m].eval()
 
-            if not params['grid_search'] :
-                # validation
-                for m in model:
-                    model[m].eval()
+            tot_loss = {}
+            tot_loss['all'] = 0.0
+            met = {}
+            for t in tasks:
+                tot_loss[t] = 0.0
+                met[t] = 0.0
 
-                tot_loss = {}
-                tot_loss['all'] = 0.0
-                met = {}
-                for t in tasks:
-                    tot_loss[t] = 0.0
-                    met[t] = 0.0
+            num_val_batches = 0
+            for batch_val in val_loader:
+                with torch.no_grad():
+                    val_images = Variable(batch_val[0].cuda())
+                labels_val = {}
 
-                num_val_batches = 0
-                for batch_val in val_loader:
+                for i, t in enumerate(all_tasks):
+                    if t not in tasks:
+                        continue
+                    labels_val[t] = batch_val[i+1]
                     with torch.no_grad():
-                        val_images = Variable(batch_val[0].cuda())
-                    labels_val = {}
+                        labels_val[t] = Variable(labels_val[t].cuda())
 
-                    for i, t in enumerate(all_tasks):
-                        if t not in tasks:
-                            continue
-                        labels_val[t] = batch_val[i+1]
-                        with torch.no_grad():
-                            labels_val[t] = Variable(labels_val[t].cuda())
-
-                    val_rep, _ = model['rep'](val_images, None)
-                    for t in tasks:
-                        out_t_val, _ = model[t](val_rep, None)
-                        loss_t = loss_fn[t](out_t_val, labels_val[t])
-                        tot_loss['all'] += loss_t.item()
-                        tot_loss[t] += loss_t.item()
-                        metric[t].update(out_t_val, labels_val[t])
-                    num_val_batches+=1
-
+                val_rep, _ = model['rep'](val_images, None)
                 for t in tasks:
-                    writer.add_scalar('validation_loss_{}'.format(t), tot_loss[t]/num_val_batches, n_iter)
-                    metric_results = metric[t].get_result()
-                    metric_str = 'task_{} : '.format(t)
-                    for metric_key in metric_results:
-                        writer.add_scalar('metric_{}_{}'.format(metric_key, t), metric_results[metric_key], n_iter)
-                        metric_str += '{} = {}  '.format(metric_key, metric_results[metric_key])
-                    metric[t].reset()
-                    metric_str += 'loss = {}'.format(tot_loss[t]/num_val_batches)
-                    print(metric_str)
-                print('all loss = {}'.format(tot_loss['all']/len(val_dst)))
-                writer.add_scalar('validation_loss', tot_loss['all']/len(val_dst), n_iter)
+                    out_t_val, _ = model[t](val_rep, None)
+                    loss_t = loss_fn[t](out_t_val, labels_val[t])
+                    tot_loss['all'] += loss_t.item()
+                    tot_loss[t] += loss_t.item()
+                    metric[t].update(out_t_val, labels_val[t])
+                num_val_batches+=1
 
-                # Use early stopping to monitor training
-                init_val_loss = float('inf')
-                avg_val_loss = tot_loss['all']/len(val_dst)
+            for t in tasks:
+                writer.add_scalar('validation_loss_{}'.format(t), tot_loss[t]/num_val_batches, n_iter)
+                metric_results = metric[t].get_result()
+                metric_str = 'task_{} : '.format(t)
+                for metric_key in metric_results:
+                    writer.add_scalar('metric_{}_{}'.format(metric_key, t), metric_results[metric_key], n_iter)
+                    metric_str += '{} = {}  '.format(metric_key, metric_results[metric_key])
+                metric[t].reset()
+                metric_str += 'loss = {}'.format(tot_loss[t]/num_val_batches)
+                print(metric_str)
+            print('all loss = {}'.format(tot_loss['all']/len(val_dst)))
+            writer.add_scalar('validation_loss', tot_loss['all']/len(val_dst), n_iter)
+
+            # Use early stopping to monitor training
+            init_val_loss = float('inf')
+            avg_val_loss = tot_loss['all']/len(val_dst)
+            count = 0
+            if avg_val_loss < init_val_loss:
+                init_val_loss = avg_val_loss
+                # save model weights if val loss decreases
+                print('Saving model...')
+                state = {'epoch': epoch+1,
+                        'model_rep': model['rep'].state_dict(),
+                        'optimizer_state' : optimizer.state_dict()}
+                for t in tasks:
+                    key_name = 'model_{}'.format(t)
+                    state[key_name] = model[t].state_dict()
+
+                torch.save(state, "saved_models/{}_{}_model.pkl".format(params['exp_id'], epoch+1))
+                # reset count
                 count = 0
-                if avg_val_loss < init_val_loss:
-                    init_val_loss = avg_val_loss
-                    # save model weights if val loss decreases
-                    print('Saving model...')
-                    state = {'epoch': epoch+1,
-                            'model_rep': model['rep'].state_dict(),
-                            'optimizer_state' : optimizer.state_dict()}
-                    for t in tasks:
-                        key_name = 'model_{}'.format(t)
-                        state[key_name] = model[t].state_dict()
-
-                    torch.save(state, "saved_models/{}_{}_model.pkl".format(params['exp_id'], epoch+1))
-                    # reset count
-                    count = 0
-                elif avg_val_loss >= init_val_loss:
-                    count += 1
-                    if count == 10:
-                        print('Val EMD loss has not decreased in %d epochs. Training terminated.' % 10)
-                        break
+            elif avg_val_loss >= init_val_loss:
+                count += 1
+                if count == 10:
+                    print('Val EMD loss has not decreased in %d epochs. Training terminated.' % 10)
+                    break
 
             # if epoch % 3 == 0:
             #     # Save after every 3 epoch
@@ -244,54 +227,140 @@ def train_multi_task(params):
 
             #     torch.save(state, "saved_models/{}_{}_model.pkl".format(params['exp_id'], epoch+1))
 
-            end = timer()
-            print('Epoch ended in {}s'.format(end - start))
+        
 
-        if params['test'] :
-
-            # test
+        if params['grid_search'] :
+            val_loader, val_dst = dataset_selector.get_dataset(params, configs)
             for m in model:
-                model[m].eval()
-            
-            test_tot_loss = {}
-            test_tot_loss['all'] = 0.0
-            test_met = {}
-            for t in tasks:
-                test_tot_loss[t] = 0.0
-                test_met[t] = 0.0
+                model[m].train()
 
-            num_test_batches = 0
-            for batch_test in test_loader:
-                with torch.no_grad():
-                    test_images = Variable(batch_test[0].cuda())
-                labels_test = {}
-
+            for batch in val_loader:
+                n_iter += 1
+                # First member is always images
+                images = batch[0]
+                images = Variable(images.cuda())
+                labels = {}
+                # Read all targets of all tasks
                 for i, t in enumerate(all_tasks):
                     if t not in tasks:
                         continue
-                    labels_test[t] = batch_test[i+1]
-                    with torch.no_grad():
-                        labels_test[t] = Variable(labels_test[t].cuda())
-
-                test_rep, _ = model['rep'](test_images, None)
+                    labels[t] = batch[i+1]
+                    labels[t] = Variable(labels[t].cuda())
+                # Scaling the loss functions based on the algorithm choice
+                loss_data = {}
+                grads = {}
+                scale = {}
+                mask = None
+                masks = {}
+                # use algo MGDA_UB 
+                optimizer.zero_grad()
+                # First compute representations (z)
+                with torch.no_grad():
+                    images_volatile = Variable(images.data)
+                rep, mask = model['rep'](images_volatile, mask)
+                # As an approximate solution we only need gradients for input
+                rep_variable = Variable(rep.data.clone(), requires_grad=True)
+                list_rep = False
+                # Compute gradients of each loss function wrt z
                 for t in tasks:
-                    out_t_test, _ = model[t](test_rep, None)
-                    test_loss_t = loss_fn[t](out_t_test, labels_test[t])
-                    test_tot_loss['all'] += test_loss_t.item()
-                    test_tot_loss[t] += test_loss_t.item()
-                    metric[t].update(out_t_test, labels_test[t])
-                num_test_batches+=1
+                    optimizer.zero_grad()
+                    out_t, masks[t] = model[t](rep_variable, None)
+                    loss = loss_fn[t](out_t, labels[t])
+                    loss_data[t] = loss.item()
+                    loss.backward()
+                    grads[t] = Variable(rep_variable.grad.data.clone(), requires_grad=False)
+                    rep_variable.grad.data.zero_()
+                # Normalize all gradients, this is optional and not included in the paper.
+                gn = gradient_normalizers(grads, loss_data, params['normalization_type'])
+                for t in tasks:
+                    for gr_i in range(len(grads[t])):
+                        grads[t][gr_i] = grads[t][gr_i] / gn[t]
+                # Frank-Wolfe iteration to compute scales.
+                sol, min_norm = MinNormSolver.find_min_norm_element([grads[t] for t in tasks])
+                for i, t in enumerate(tasks):
+                    scale[t] = float(sol[i])
+                # Scaled back-propagation
+                optimizer.zero_grad()
+                rep, _ = model['rep'](images, mask)
+                for i, t in enumerate(tasks):
+                    out_t, _ = model[t](rep, masks[t])
+                    loss_t = loss_fn[t](out_t, labels[t])
+                    loss_data[t] = loss_t.item()
+                    metric[t].update(out_t, labels[t])
+                    if i > 0:
+                        loss = loss + scale[t]*loss_t
+                    else:
+                        loss = scale[t]*loss_t
+                loss.backward()
+                optimizer.step()
 
-            print('test:')
+            avg_plcc_list = []
+            avg_plcc = 0
+            writer.add_scalar('training_loss', loss.item(), n_iter)
             for t in tasks:
-                test_metric_results = metric[t].get_result()
-                test_metric_str = 'task_{} : '.format(t)
-                for metric_key in test_metric_results:
-                    test_metric_str += '{} = {}  '.format(metric_key, test_metric_results[metric_key])
+                writer.add_scalar('training_loss_{}'.format(t), loss_data[t], n_iter)
+                metric_results = metric[t].get_result()
+                avg_plcc += metric_results['plcc']
+                metric_str = 'task_{} : '.format(t)
+                for metric_key in metric_results:
+                    writer.add_scalar('training_metric_{}_{}'.format(metric_key, t), metric_results[metric_key], n_iter)
+                    metric_str += '{} = {}  '.format(metric_key, metric_results[metric_key])
                 metric[t].reset()
-                test_metric_str += 'loss = {}'.format(test_tot_loss[t]/num_test_batches)
-                print(test_metric_str)
-            print('all loss = {}'.format(test_tot_loss['all']/len(test_dst)))
+                print(metric_str)
+            avg_plcc /= 4
+            avg_plcc_list.append(avg_plcc) 
+
+
+        end = timer()
+        print('Epoch ended in {}s'.format(end - start))
+
+    # test
+    if params['test'] :
+        for m in model:
+            model[m].eval()
+        
+        test_tot_loss = {}
+        test_tot_loss['all'] = 0.0
+        test_met = {}
+        for t in tasks:
+            test_tot_loss[t] = 0.0
+            test_met[t] = 0.0
+
+        num_test_batches = 0
+        for batch_test in test_loader:
+            with torch.no_grad():
+                test_images = Variable(batch_test[0].cuda())
+            labels_test = {}
+
+            for i, t in enumerate(all_tasks):
+                if t not in tasks:
+                    continue
+                labels_test[t] = batch_test[i+1]
+                with torch.no_grad():
+                    labels_test[t] = Variable(labels_test[t].cuda())
+
+            test_rep, _ = model['rep'](test_images, None)
+            for t in tasks:
+                out_t_test, _ = model[t](test_rep, None)
+                test_loss_t = loss_fn[t](out_t_test, labels_test[t])
+                test_tot_loss['all'] += test_loss_t.item()
+                test_tot_loss[t] += test_loss_t.item()
+                metric[t].update(out_t_test, labels_test[t])
+            num_test_batches+=1
+
+        print('test:')
+        for t in tasks:
+            test_metric_results = metric[t].get_result()
+            test_metric_str = 'task_{} : '.format(t)
+            for metric_key in test_metric_results:
+                test_metric_str += '{} = {}  '.format(metric_key, test_metric_results[metric_key])
+            metric[t].reset()
+            test_metric_str += 'loss = {}'.format(test_tot_loss[t]/num_test_batches)
+            print(test_metric_str)
+        print('all loss = {}'.format(test_tot_loss['all']/len(test_dst)))
+        
+        
+
 
 if __name__ == '__main__':
     train_multi_task()
