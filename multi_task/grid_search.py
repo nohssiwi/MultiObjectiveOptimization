@@ -1,4 +1,5 @@
 from main import train_multi_task
+import torch
 
 def grid_search() :
     ''' 

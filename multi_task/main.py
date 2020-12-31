@@ -30,8 +30,8 @@ def train_multi_task(params):
 
     exp_identifier = []
     for (key, val) in params.items():
-        if ('tasks' in key) or ('dataset' in key) or ('normalization_type' in key) or
-            ('grid_search' in key) or ('train' in key) or ('test' in key):
+        if ('tasks' in key) or ('dataset' in key) or ('normalization_type' in key) \
+            or ('grid_search' in key) or ('train' in key) or ('test' in key):
             continue
         exp_identifier+= ['{}={}'.format(key,val)]
 
