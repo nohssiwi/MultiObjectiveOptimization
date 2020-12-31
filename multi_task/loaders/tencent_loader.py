@@ -140,7 +140,7 @@ class TENCENT(data.Dataset):
         for i in range(0, self.patch_size) :  
             patch = crop(img)
             if (self.type == 'cv_train') :
-                patch = flip(img)
+                patch = flip(patch)
             patches.append(patch)
         if self.global_patch :
             patches.append(patch_global)
