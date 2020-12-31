@@ -43,4 +43,7 @@ def get_dataset(params, configs):
             train_loader = torch.utils.data.DataLoader(train_dst, batch_size=params['batch_size'], shuffle=True, num_workers=4)
             val_loader = torch.utils.data.DataLoader(val_dst, batch_size=params['batch_size'], num_workers=4)
             test_loader = torch.utils.data.DataLoader(test_dst, batch_size=params['batch_size'], num_workers=4)
-        return train_loader, train_dst, val_loader, val_dst, test_dst, test_loader
+        # return train_loader, train_dst, val_loader, val_dst, test_dst, test_loader
+
+        if params['grid_search'] :
+            return val_loader, val_dst

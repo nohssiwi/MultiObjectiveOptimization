@@ -1,5 +1,8 @@
 from main import train_multi_task
 
+def train_multi_task() :
+
+
 def grid_search() :
     ''' 
     hyperparams : 
@@ -27,7 +30,10 @@ def grid_search() :
         "dataset": "tencent",
         "tasks": ["H", "C", "F", "O"],
         "optimizer": "SGD",
-        "normalization_type": "loss+"
+        "normalization_type": "loss+",
+        "grid_search": True,
+        "train": False,
+        "test": False
     }
     for p in [0.25, 0.5, 0.75] :
         params['dropout_prob'] = p
@@ -74,3 +80,6 @@ def grid_search() :
                                             else:
                                                 # raise exception
                                                 continue
+
+if __name__ == '__main__':
+    grid_search()
