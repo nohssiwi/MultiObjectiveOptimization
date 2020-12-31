@@ -14,7 +14,7 @@ def _5foldcv() :
         'batch_size': 8,
         'img_h': 454,
         'img_w': 984,
-        'patch_size' : 8,
+        'patch_size' : 6,
         'global_patch': True,
         'crop_h' : 272,
         'crop_w' : 590,
