@@ -8,7 +8,7 @@ def _5foldcv() :
         "normalization_type": "loss+",
         "grid_search": False,
         "train": True,
-        "test": True,
+        "test": False,
         'dropout_prob': 0.75,
         'lr': 0.001,
         'batch_size': 8,
