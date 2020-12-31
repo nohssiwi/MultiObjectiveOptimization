@@ -206,7 +206,7 @@ def train_multi_task(params, fold=0):
             writer.add_scalar('validation_loss', tot_loss['all']/len(val_dst), n_iter)
             avg_plcc /= 4
 
-            print(plcc)
+            print(avg_plcc)
             print(init_val_plcc)
             if init_val_plcc < avg_plcc:
                 init_val_plcc = avg_plcc
