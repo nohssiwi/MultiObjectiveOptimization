@@ -40,9 +40,9 @@ def _5foldcv() :
     params['train'] = False
     params['test'] = True 
     # params['best_epoch'] = best_epoch
-    params['best_epoch'] = 71
+    params['best_epoch'] = 77
     # params['best_fold'] = index + 1
-    params['best_fold'] = 5
+    params['best_fold'] = 4
     # params['exp_identifier'] = best_id
     params['exp_identifier'] = 'optimizer=SGD|dropout_prob=0.75|lr=0.001|batch_size=8|img_h=454|img_w=984|patch_size=0|global_patch=False|crop_h=256|crop_w=256|crop_or_pad=True'
     params['batch_size'] = 1
