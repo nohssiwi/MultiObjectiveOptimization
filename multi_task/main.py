@@ -43,7 +43,7 @@ def train_multi_task(params, fold=0):
         writer = SummaryWriter(log_dir='5fold_runs/{}_{}'.format(exp_identifier, datetime.datetime.now().strftime("%I:%M%p on %B %d, %Y")))
 
     if params['test'] :
-        test_dst, test_loader = dataset_selector.get_dataset(params, configs)
+        test_loader, test_dst = dataset_selector.get_dataset(params, configs)
 
     loss_fn = loss_selector.get_loss(params)
     metric = metrics_selector.get_metrics(params)
