@@ -233,7 +233,7 @@ def train_multi_task(params, fold=0):
         print('Epoch ended in {}s'.format(end - start))
 
     print('Training completed.')
-    return exp_identifier, avg_plcc, best_epoch
+    return exp_identifier, init_val_plcc, best_epoch
 
     # test
     if params['test'] :
