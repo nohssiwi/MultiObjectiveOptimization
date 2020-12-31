@@ -54,4 +54,4 @@ def get_dataset(params, configs, fold=0):
         if params['train'] :
             return train_loader, train_dst, val_loader, val_dst
         if params['test'] :
-            return test_dst, test_loader
+            return test_loader, test_dst
