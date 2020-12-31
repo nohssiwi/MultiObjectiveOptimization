@@ -7,9 +7,10 @@ import math
 from PIL import Image
 
 class TENCENT(data.Dataset):
-    def __init__(self, root, type, patch_size, global_patch, crop_or_pad, img_h, img_w, crop_size, is_transform=True):
+    def __init__(self, root, type, patch_size, global_patch, crop_or_pad, img_h, img_w, crop_size, fold=0, is_transform=True):
         self.root = root
         self.type = type
+        self.fold = fold
         self.is_transform = is_transform
         # self.augmentations = augmentations
         self.patch_size = patch_size
