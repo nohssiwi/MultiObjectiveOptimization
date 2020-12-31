@@ -72,17 +72,19 @@ def train_multi_task(params, fold=0):
     init_val_plcc = 0
     best_epoch = 0
 
-    for epoch in tqdm(range(NUM_EPOCHS)):
-        start = timer()
-        print('Epoch {} Started'.format(epoch))
-        if (epoch+1) % 30 == 0:
-            # Every 30 epoch, half the LR
-            for param_group in optimizer.param_groups:
-                param_group['lr'] *= 0.5
-            print('Half the learning rate {}'.format(n_iter))
+    # train
+    if params['train'] :
 
-        # train
-        if params['train'] :
+        for epoch in tqdm(range(NUM_EPOCHS)):
+            start = timer()
+            print('Epoch {} Started'.format(epoch))
+            if (epoch+1) % 30 == 0:
+                # Every 30 epoch, half the LR
+                for param_group in optimizer.param_groups:
+                    param_group['lr'] *= 0.5
+                print('Half the learning rate {}'.format(n_iter))
+
+            
             for m in model:
                 model[m].train()
 
@@ -229,11 +231,11 @@ def train_multi_task(params, fold=0):
                     print('Val EMD loss has not decreased in %d epochs. Training terminated.' % 10)
                     break
 
-        end = timer()
-        print('Epoch ended in {}s'.format(end - start))
+            end = timer()
+            print('Epoch ended in {}s'.format(end - start))
 
-    print('Training completed.')
-    return exp_identifier, init_val_plcc, best_epoch
+        print('Training completed.')
+        return exp_identifier, init_val_plcc, best_epoch
 
     # test
     if params['test'] :
