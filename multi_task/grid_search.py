@@ -23,6 +23,16 @@ def grid_search() :
     decay ?
     decay_epoch ?
     '''
+    p_list = [0.25, 0.5, 0.75]
+    lr_list = [0.01, 0.001, 0.0001]
+    batch_size_list = [32, 16, 8, 6, 4]
+    img_h_list = [720, 454, 256]
+    img_w_list = []
+    patch_size_list = [8, 7, 6, 0]
+    global_patch = [True, False]
+    crop_size_list = [(256, 512), (256, 256), (224, 224)]
+    crop_or_pad = [True, False] # true = pad false = crop
+
     params = {
         "dataset": "tencent",
         "tasks": ["H", "C", "F", "O"],
@@ -42,24 +52,24 @@ def grid_search() :
         'crop_w' : 0,
         'crop_or_pad' : False
     }
-    for p in [0.25, 0.5, 0.75] :
+    for p in p_list :
         params['dropout_prob'] = p
-        for lr in [0.1, 0.01, 0.001, 0.0001] :
+        for lr in lr_list :
             params['lr'] = lr 
-            for bs in [4, 6, 8, 16, 32] :
+            for bs in batch_size_list :
                 params['batch_size'] = bs
-                for img_h in [256, 454, 720] :
+                for img_h in img_h_list :
                     params['img_h'] = img_h
-                    for ps in [0, 6, 7, 8] :
+                    for ps in patch_size_list :
                         params['patch_size'] = ps
                         if (ps > 0) :
-                            for gp in [False, True] :
+                            for gp in global_patch :
                                 params['global_patch'] = gp
-                                for cs in [(224, 224), (256, 256), (256,512)] :
+                                for cs in crop_size_list :
                                     params['crop_h'] = cs[0]
                                     params['crop_w'] = cs[1]
                         else :
-                            for cp in [False, True] :
+                            for cp in crop_or_pad :
                                 params['crop_or_pad'] = cp 
                                 if cp == 0 :
                                     for img_w in [454, 806, 1279] :
