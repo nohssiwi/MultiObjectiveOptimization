@@ -140,6 +140,9 @@ cython_debug/
 
 .idea/
 runs/*
+gs_runs/
+5fold_runs/
 saved_models/*
 PATH_FOR_MULTIMNIST_DATASET/
 Qomex_2020_mobile_game_imges/
+*.zip

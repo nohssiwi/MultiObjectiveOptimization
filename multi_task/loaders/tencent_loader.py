@@ -112,7 +112,7 @@ class TENCENT(data.Dataset):
             padding = (math.ceil((self.img_w-w) / 2), 0, math.floor((self.img_w-w) / 2), 0)
             pad = transforms.Pad(padding, fill=0, padding_mode='constant')
             img = pad(img)
-        if (self.type == 'train') :
+        if (self.type == 'cv_train') :
             img = flip(img)
         return img
 
@@ -139,7 +139,7 @@ class TENCENT(data.Dataset):
         patches = []
         for i in range(0, self.patch_size) :  
             patch = crop(img)
-            if (self.type == 'train') :
+            if (self.type == 'cv_train') :
                 patch = flip(img)
             patches.append(patch)
         if self.global_patch :

@@ -104,3 +104,85 @@ def grid_search() :
 if __name__ == '__main__':
     grid_search()
 
+
+
+  # if params['grid_search'] :
+        #     # val_loader, val_dst = dataset_selector.get_dataset(params, configs)
+        #     for m in model:
+        #         model[m].train()
+
+        #     for batch in val_loader:
+        #         n_iter += 1
+        #         # First member is always images
+        #         images = batch[0]
+        #         images = Variable(images.cuda())
+        #         labels = {}
+        #         # Read all targets of all tasks
+        #         for i, t in enumerate(all_tasks):
+        #             if t not in tasks:
+        #                 continue
+        #             labels[t] = batch[i+1]
+        #             labels[t] = Variable(labels[t].cuda())
+        #         # Scaling the loss functions based on the algorithm choice
+        #         loss_data = {}
+        #         grads = {}
+        #         scale = {}
+        #         mask = None
+        #         masks = {}
+        #         # use algo MGDA_UB 
+        #         optimizer.zero_grad()
+        #         # First compute representations (z)
+        #         with torch.no_grad():
+        #             images_volatile = Variable(images.data)
+        #         rep, mask = model['rep'](images_volatile, mask)
+        #         # As an approximate solution we only need gradients for input
+        #         rep_variable = Variable(rep.data.clone(), requires_grad=True)
+        #         list_rep = False
+        #         # Compute gradients of each loss function wrt z
+        #         for t in tasks:
+        #             optimizer.zero_grad()
+        #             out_t, masks[t] = model[t](rep_variable, None)
+        #             loss = loss_fn[t](out_t, labels[t])
+        #             loss_data[t] = loss.item()
+        #             loss.backward()
+        #             grads[t] = Variable(rep_variable.grad.data.clone(), requires_grad=False)
+        #             rep_variable.grad.data.zero_()
+        #         # Normalize all gradients, this is optional and not included in the paper.
+        #         gn = gradient_normalizers(grads, loss_data, params['normalization_type'])
+        #         for t in tasks:
+        #             for gr_i in range(len(grads[t])):
+        #                 grads[t][gr_i] = grads[t][gr_i] / gn[t]
+        #         # Frank-Wolfe iteration to compute scales.
+        #         sol, min_norm = MinNormSolver.find_min_norm_element([grads[t] for t in tasks])
+        #         for i, t in enumerate(tasks):
+        #             scale[t] = float(sol[i])
+        #         # Scaled back-propagation
+        #         optimizer.zero_grad()
+        #         rep, _ = model['rep'](images, mask)
+        #         for i, t in enumerate(tasks):
+        #             out_t, _ = model[t](rep, masks[t])
+        #             loss_t = loss_fn[t](out_t, labels[t])
+        #             loss_data[t] = loss_t.item()
+        #             metric[t].update(out_t, labels[t])
+        #             if i > 0:
+        #                 loss = loss + scale[t]*loss_t
+        #             else:
+        #                 loss = scale[t]*loss_t
+        #         loss.backward()
+        #         optimizer.step()
+
+        #     avg_plcc_list = []
+        #     avg_plcc = 0
+        #     writer.add_scalar('training_loss', loss.item(), n_iter)
+        #     for t in tasks:
+        #         writer.add_scalar('training_loss_{}'.format(t), loss_data[t], n_iter)
+        #         metric_results = metric[t].get_result()
+        #         avg_plcc += metric_results['plcc']
+        #         metric_str = 'task_{} : '.format(t)
+        #         for metric_key in metric_results:
+        #             writer.add_scalar('training_metric_{}_{}'.format(metric_key, t), metric_results[metric_key], n_iter)
+        #             metric_str += '{} = {}  '.format(metric_key, metric_results[metric_key])
+        #         metric[t].reset()
+        #         print(metric_str)
+        #     avg_plcc /= 4
+        #     avg_plcc_list.append(avg_plcc) 

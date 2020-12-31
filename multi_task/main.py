@@ -21,7 +21,7 @@ NUM_EPOCHS = 100
 # @click.command()
 # @click.option('--param_file', default='params.json', help='JSON parameters file')
 # def train_multi_task(param_file):
-def train_multi_task(params):
+def train_multi_task(params, fold=0):
     with open('configs.json') as config_params:
         configs = json.load(config_params)
 
@@ -38,10 +38,13 @@ def train_multi_task(params):
     exp_identifier = '|'.join(exp_identifier)
     # params['exp_id'] = exp_identifier
 
-    writer = SummaryWriter(log_dir='gs_runs/{}_{}'.format(exp_identifier, datetime.datetime.now().strftime("%I:%M%p on %B %d, %Y")))
+    if params['train'] :
+        train_loader, train_dst, val_loader, val_dst = dataset_selector.get_dataset(params, configs, fold)
+        writer = SummaryWriter(log_dir='5fold_runs/{}_{}'.format(exp_identifier, datetime.datetime.now().strftime("%I:%M%p on %B %d, %Y")))
 
-    # train_loader, train_dst, val_loader, val_dst, test_loader, test_dst 
-    #     = dataset_selector.get_dataset(params, configs)
+    if params['test'] :
+        test_dst, test_loader = dataset_selector.get_dataset(params, configs)
+
     loss_fn = loss_selector.get_loss(params)
     metric = metrics_selector.get_metrics(params)
 
@@ -63,13 +66,19 @@ def train_multi_task(params):
 
     n_iter = 0
     loss_init = {}
+
+    # early stopping
+    count = 0
+    init_val_plcc = 0
+    best_epoch = 0
+
     for epoch in tqdm(range(NUM_EPOCHS)):
         start = timer()
         print('Epoch {} Started'.format(epoch))
-        if (epoch+1) % 30 == 0:
+        if (epoch+1) % 10 == 0:
             # Every 30 epoch, half the LR
             for param_group in optimizer.param_groups:
-                param_group['lr'] *= 0.5
+                param_group['lr'] *= 0.95
             print('Half the learning rate {}'.format(n_iter))
 
         # train
@@ -181,9 +190,11 @@ def train_multi_task(params):
                     metric[t].update(out_t_val, labels_val[t])
                 num_val_batches+=1
 
+            avg_plcc = 0
             for t in tasks:
                 writer.add_scalar('validation_loss_{}'.format(t), tot_loss[t]/num_val_batches, n_iter)
                 metric_results = metric[t].get_result()
+                avg_plcc += metric_results['plcc']
                 metric_str = 'task_{} : '.format(t)
                 for metric_key in metric_results:
                     writer.add_scalar('metric_{}_{}'.format(metric_key, t), metric_results[metric_key], n_iter)
@@ -193,13 +204,10 @@ def train_multi_task(params):
                 print(metric_str)
             print('all loss = {}'.format(tot_loss['all']/len(val_dst)))
             writer.add_scalar('validation_loss', tot_loss['all']/len(val_dst), n_iter)
+            avg_plcc /= 4
 
-            # Use early stopping to monitor training
-            init_val_loss = float('inf')
-            avg_val_loss = tot_loss['all']/len(val_dst)
-            count = 0
-            if avg_val_loss < init_val_loss:
-                init_val_loss = avg_val_loss
+            if init_val_plcc < avg_plcc:
+                init_val_plcc = avg_plcc
                 # save model weights if val loss decreases
                 print('Saving model...')
                 state = {'epoch': epoch+1,
@@ -209,115 +217,27 @@ def train_multi_task(params):
                     key_name = 'model_{}'.format(t)
                     state[key_name] = model[t].state_dict()
 
-                torch.save(state, "saved_models/{}_{}_model.pkl".format(exp_identifier, epoch+1))
+                torch.save(state, "saved_models/{}_{}_{}_model.pkl".format(exp_identifier, epoch+1, fold))
+                best_epoch = epoch + 1
                 # reset count
                 count = 0
-            elif avg_val_loss >= init_val_loss:
+            elif init_val_plcc >= avg_plcc:
                 count += 1
                 if count == 10:
                     print('Val EMD loss has not decreased in %d epochs. Training terminated.' % 10)
                     break
 
-            # if epoch % 3 == 0:
-            #     # Save after every 3 epoch
-            #     state = {'epoch': epoch+1,
-            #             'model_rep': model['rep'].state_dict(),
-            #             'optimizer_state' : optimizer.state_dict()}
-            #     for t in tasks:
-            #         key_name = 'model_{}'.format(t)
-            #         state[key_name] = model[t].state_dict()
-
-            #     torch.save(state, "saved_models/{}_{}_model.pkl".format(params['exp_id'], epoch+1))
-
-        
-
-        if params['grid_search'] :
-            val_loader, val_dst = dataset_selector.get_dataset(params, configs)
-            for m in model:
-                model[m].train()
-
-            for batch in val_loader:
-                n_iter += 1
-                # First member is always images
-                images = batch[0]
-                images = Variable(images.cuda())
-                labels = {}
-                # Read all targets of all tasks
-                for i, t in enumerate(all_tasks):
-                    if t not in tasks:
-                        continue
-                    labels[t] = batch[i+1]
-                    labels[t] = Variable(labels[t].cuda())
-                # Scaling the loss functions based on the algorithm choice
-                loss_data = {}
-                grads = {}
-                scale = {}
-                mask = None
-                masks = {}
-                # use algo MGDA_UB 
-                optimizer.zero_grad()
-                # First compute representations (z)
-                with torch.no_grad():
-                    images_volatile = Variable(images.data)
-                rep, mask = model['rep'](images_volatile, mask)
-                # As an approximate solution we only need gradients for input
-                rep_variable = Variable(rep.data.clone(), requires_grad=True)
-                list_rep = False
-                # Compute gradients of each loss function wrt z
-                for t in tasks:
-                    optimizer.zero_grad()
-                    out_t, masks[t] = model[t](rep_variable, None)
-                    loss = loss_fn[t](out_t, labels[t])
-                    loss_data[t] = loss.item()
-                    loss.backward()
-                    grads[t] = Variable(rep_variable.grad.data.clone(), requires_grad=False)
-                    rep_variable.grad.data.zero_()
-                # Normalize all gradients, this is optional and not included in the paper.
-                gn = gradient_normalizers(grads, loss_data, params['normalization_type'])
-                for t in tasks:
-                    for gr_i in range(len(grads[t])):
-                        grads[t][gr_i] = grads[t][gr_i] / gn[t]
-                # Frank-Wolfe iteration to compute scales.
-                sol, min_norm = MinNormSolver.find_min_norm_element([grads[t] for t in tasks])
-                for i, t in enumerate(tasks):
-                    scale[t] = float(sol[i])
-                # Scaled back-propagation
-                optimizer.zero_grad()
-                rep, _ = model['rep'](images, mask)
-                for i, t in enumerate(tasks):
-                    out_t, _ = model[t](rep, masks[t])
-                    loss_t = loss_fn[t](out_t, labels[t])
-                    loss_data[t] = loss_t.item()
-                    metric[t].update(out_t, labels[t])
-                    if i > 0:
-                        loss = loss + scale[t]*loss_t
-                    else:
-                        loss = scale[t]*loss_t
-                loss.backward()
-                optimizer.step()
-
-            avg_plcc_list = []
-            avg_plcc = 0
-            writer.add_scalar('training_loss', loss.item(), n_iter)
-            for t in tasks:
-                writer.add_scalar('training_loss_{}'.format(t), loss_data[t], n_iter)
-                metric_results = metric[t].get_result()
-                avg_plcc += metric_results['plcc']
-                metric_str = 'task_{} : '.format(t)
-                for metric_key in metric_results:
-                    writer.add_scalar('training_metric_{}_{}'.format(metric_key, t), metric_results[metric_key], n_iter)
-                    metric_str += '{} = {}  '.format(metric_key, metric_results[metric_key])
-                metric[t].reset()
-                print(metric_str)
-            avg_plcc /= 4
-            avg_plcc_list.append(avg_plcc) 
-
-
         end = timer()
         print('Epoch ended in {}s'.format(end - start))
 
+    print('Training completed.')
+    return exp_identifier, avg_plcc, best_epoch
+
     # test
     if params['test'] :
+        model.load_state_dict(torch.load(os.path.join('./saved_models', "{}_{}_{}_model.pkl".format(params['exp_identifier'], params['best_epoch'], params['best_fold']))))
+        print('Successfully loaded model')
+    
         for m in model:
             model[m].eval()
         
@@ -357,9 +277,9 @@ def train_multi_task(params):
             for metric_key in test_metric_results:
                 test_metric_str += '{} = {}  '.format(metric_key, test_metric_results[metric_key])
             metric[t].reset()
-            test_metric_str += 'loss = {}'.format(test_tot_loss[t]/num_test_batches)
+            # test_metric_str += 'loss = {}'.format(test_tot_loss[t]/num_test_batches)
             print(test_metric_str)
-        print('all loss = {}'.format(test_tot_loss['all']/len(test_dst)))
+        # print('all loss = {}'.format(test_tot_loss['all']/len(test_dst)))
         
         
 
