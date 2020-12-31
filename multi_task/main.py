@@ -36,9 +36,9 @@ def train_multi_task(params):
         exp_identifier+= ['{}={}'.format(key,val)]
 
     exp_identifier = '|'.join(exp_identifier)
-    params['exp_id'] = exp_identifier
+    # params['exp_id'] = exp_identifier
 
-    writer = SummaryWriter(log_dir='gs_runs/{}_{}'.format(params['exp_id'], datetime.datetime.now().strftime("%I:%M%p on %B %d, %Y")))
+    writer = SummaryWriter(log_dir='gs_runs/{}_{}'.format(exp_identifier, datetime.datetime.now().strftime("%I:%M%p on %B %d, %Y")))
 
     # train_loader, train_dst, val_loader, val_dst, test_loader, test_dst 
     #     = dataset_selector.get_dataset(params, configs)
@@ -209,7 +209,7 @@ def train_multi_task(params):
                     key_name = 'model_{}'.format(t)
                     state[key_name] = model[t].state_dict()
 
-                torch.save(state, "saved_models/{}_{}_model.pkl".format(params['exp_id'], epoch+1))
+                torch.save(state, "saved_models/{}_{}_model.pkl".format(exp_identifier, epoch+1))
                 # reset count
                 count = 0
             elif avg_val_loss >= init_val_loss:

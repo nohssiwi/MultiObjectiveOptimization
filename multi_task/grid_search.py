@@ -73,7 +73,7 @@ def grid_search() :
                             for cp in crop_or_pad :
                                 params['crop_or_pad'] = cp 
                                 if cp == 0 :
-                                    for img_w in [454, 806, 1279] :
+                                    for img_w in [1279, 806, 454] :
                                         params['img_w'] = img_w
                                         try:
                                             train_multi_task(params)
@@ -86,7 +86,7 @@ def grid_search() :
                                                 # raise exception
                                                 continue
                                 else :
-                                    for img_w in [554, 984, 1560] :
+                                    for img_w in [1560, 984, 554] :
                                         params['img_w'] = img_w
                                         try:
                                             train_multi_task(params)
