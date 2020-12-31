@@ -245,7 +245,7 @@ def train_multi_task(params, fold=0):
         for t in tasks :
             key_name = 'model_{}'.format(t)
             model[t].load_state_dict(state[key_name])
-        print('Successfully loaded model')
+        print('Successfully loaded {}_{}_{}_model'.format(params['exp_identifier'], params['best_epoch'], params['best_fold']))
 
 
         for m in model:
