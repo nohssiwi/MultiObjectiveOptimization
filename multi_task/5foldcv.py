@@ -18,7 +18,7 @@ def _5foldcv() :
         'global_patch': False,
         'crop_h' : 272,
         'crop_w' : 590,
-        'crop_or_pad' : False
+        'crop_or_pad' : True
     }
 
     plcc_list = []
