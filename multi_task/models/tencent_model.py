@@ -52,12 +52,16 @@ class TencentDecoder(nn.Module):
         self.fc = nn.Linear(8192, 5)# resnet18
         # self.fc = nn.Linear(32768, 5)# resnet50
         self.s = nn.Softmax(dim=1)
-
+        # weights
+        self.weights = [0.6/self.patch_size for i in range(0, self.patch_size)]
+        self.weights.append(0.4)
+        
     def aggragate(self, patches) :    
         # if self.global_patch :
         # weight of gp = 0.4
         ps = self.patch_size + 1
-        w = [0.6/self.patch_size for i in range(0, self.patch_size)]
+        # w = [0.6/self.patch_size for i in range(0, self.patch_size)]
+        w = self.weights
         w.append(0.4)
         # else :
         # ps = self.patch_size
