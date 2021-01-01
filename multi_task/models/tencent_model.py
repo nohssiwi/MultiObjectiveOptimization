@@ -47,31 +47,33 @@ class TencentDecoder(nn.Module):
     def __init__(self, patch_size, global_patch, prob=0.75):
         super(TencentDecoder, self).__init__()
         self.global_patch = global_patch
-        self.patch_size = patch_size
         self.dropout = nn.Dropout(prob)
         self.fc = nn.Linear(8192, 5)# resnet18
         # self.fc = nn.Linear(32768, 5)# resnet50
         self.s = nn.Softmax(dim=1)
-        # weights
-        self.weights = [0.6/self.patch_size for i in range(0, self.patch_size)]
-        self.weights.append(0.4)
-        
+        if self.global_patch :
+            weights = [0.6/self.patch_size for i in range(0, self.patch_size)]
+            weights.append(0.4)
+            self.patch_size = patch_size + 1
+        else :
+            weights = [1/self.patch_size for i in range(0, self.patch_size)]
+            self.patch_size = patch_size
+        self.weights = torch.tensor(weights)
+
     def aggragate(self, patches) :    
         # if self.global_patch :
         # weight of gp = 0.4
-        ps = self.patch_size + 1
         # w = [0.6/self.patch_size for i in range(0, self.patch_size)]
         w = self.weights
-        w.append(0.4)
+        # w.append(0.4)
         # else :
         # ps = self.patch_size
         # w = [1/self.patch_size for i in range(0, self.patch_size)]
 
-        out = patches.reshape(-1, ps, 5)
-        w = torch.tensor(w)
+        out = patches.reshape(-1, self.patch_size, 5)
+        # w = torch.tensor(w)
         w = w.expand(out.shape[0], -1) 
-        w = w.view(-1, 1, ps)
-        w.cuda()
+        w = w.view(-1, 1, self.patch_size)
         out = torch.bmm(w, out)
         return out
 
