@@ -10,14 +10,14 @@ def _5foldcv() :
         "train": True,
         "test": False,
         'dropout_prob': 0.75,
-        'lr': 0.001,
-        'batch_size': 6,
+        'lr': 0.003,
+        'batch_size': 8,
         'img_h': 454,
         'img_w': 984,
-        'patch_size' : 6,
+        'patch_size' : 8,
         'global_patch': True,
         'crop_h' : 272,
-        'crop_w' : 590,
+        'crop_w' : 272,
         'crop_or_pad' : False
     }
 
