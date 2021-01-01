@@ -67,6 +67,7 @@ class TencentDecoder(nn.Module):
         w = torch.tensor(w)
         w = w.expand(out.shape[0], -1) 
         w = w.view(-1, 1, ps)
+        w.cuda()
         out = torch.bmm(w, out)
         return out
 
