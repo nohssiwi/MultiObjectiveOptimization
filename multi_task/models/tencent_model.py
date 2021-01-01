@@ -59,6 +59,7 @@ class TencentDecoder(nn.Module):
             self.patch_size = patch_size
             weights = [1/self.patch_size for i in range(0, patch_size)]
         self.weights = torch.tensor(weights)
+        self.weights.cuda()
 
     def aggragate(self, patches) :    
         # if self.global_patch :
