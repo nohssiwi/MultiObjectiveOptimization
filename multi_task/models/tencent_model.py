@@ -52,15 +52,6 @@ class TencentDecoder(nn.Module):
         self.fc = nn.Linear(8192, 5)# resnet18
         # self.fc = nn.Linear(32768, 5)# resnet50
         self.s = nn.Softmax(dim=1)
-        # if self.global_patch :
-        #     self.patch_size = patch_size + 1
-        #     weights = [0.6/self.patch_size for i in range(0, patch_size)]
-        #     weights.append(0.4)
-        # else :
-        #     self.patch_size = patch_size
-        #     weights = [1/self.patch_size for i in range(0, patch_size)]
-        # cuda0 = torch.device('cuda:0')
-        # self.weights = torch.tensor(weights, device=cuda0)
 
     def aggragate(self, patches) :    
         if self.global_patch :
@@ -73,7 +64,7 @@ class TencentDecoder(nn.Module):
             w = [1/self.patch_size for i in range(0, self.patch_size)]
         cuda0 = torch.device('cuda:0')
         w = torch.tensor(w, device=cuda0)
-        out = patches.reshape(-1, ps, 5)
+        out = patches.view(-1, ps, 5)
         w = w.expand(out.shape[0], -1) 
         w = w.view(-1, 1, ps)
         out = torch.bmm(w, out)
