@@ -11,13 +11,13 @@ def _5foldcv() :
         "test": False,
         'dropout_prob': 0.75,
         'lr': 0.001,
-        'batch_size': 16,
-        'img_h': 272,
-        'img_w': 590,
-        'patch_size' : 0,
-        'global_patch': False,
-        'crop_h' : 272,
-        'crop_w' : 590,
+        'batch_size': 8,
+        'img_h': 454,
+        'img_w': 984,
+        'patch_size' : 4,
+        'global_patch': True,
+        'crop_h' : 363,
+        'crop_w' : 787,
         'crop_or_pad' : True
     }
 

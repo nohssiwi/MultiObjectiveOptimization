@@ -57,8 +57,8 @@ class TencentDecoder(nn.Module):
         if self.global_patch :
             # weight of gp = 0.4
             ps = self.patch_size + 1
-            w = [0.6/self.patch_size for i in range(0, self.patch_size)]
-            w.append(0.4)
+            w = [0.7/self.patch_size for i in range(0, self.patch_size)]
+            w.append(0.3)
         else :
             ps = self.patch_size
             w = [1/self.patch_size for i in range(0, self.patch_size)]
