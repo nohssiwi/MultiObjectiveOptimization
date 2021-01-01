@@ -16,8 +16,8 @@ def _5foldcv() :
         'img_w': 984,
         'patch_size' : 4,
         'global_patch': True,
-        'crop_h' : 363,
-        'crop_w' : 787,
+        'crop_h' : 340,
+        'crop_w' : 738,
         'crop_or_pad' : True
     }
 
