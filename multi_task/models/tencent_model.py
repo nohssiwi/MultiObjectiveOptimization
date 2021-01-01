@@ -54,14 +54,15 @@ class TencentDecoder(nn.Module):
         self.s = nn.Softmax(dim=1)
 
     def aggragate(self, patches) :    
-        if self.global_patch :
-            # weight of gp = 0.4
-            ps = self.patch_size + 1
-            w = [0.6/self.patch_size for i in range(0, self.patch_size)]
-            w.append(0.4)
-        else :
-            ps = self.patch_size
-            w = [1/self.patch_size for i in range(0, self.patch_size)]
+        # if self.global_patch :
+        # weight of gp = 0.4
+        ps = self.patch_size + 1
+        w = [0.6/self.patch_size for i in range(0, self.patch_size)]
+        w.append(0.4)
+        # else :
+        # ps = self.patch_size
+        # w = [1/self.patch_size for i in range(0, self.patch_size)]
+
         out = patches.reshape(-1, ps, 5)
         w = torch.tensor(w)
         w = w.expand(out.shape[0], -1) 
