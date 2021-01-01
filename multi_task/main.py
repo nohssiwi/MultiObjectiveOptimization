@@ -79,10 +79,10 @@ def train_multi_task(params, fold=0):
         for epoch in tqdm(range(NUM_EPOCHS)):
             start = timer()
             print('Epoch {} Started'.format(epoch))
-            if (epoch+1) % 10 == 0:
+            if (epoch+1) % 30 == 0:
                 # Every 30 epoch, half the LR
                 for param_group in optimizer.param_groups:
-                    param_group['lr'] *= 0.8
+                    param_group['lr'] *= 0.5
                 print('Half the learning rate {}'.format(n_iter))
 
             
