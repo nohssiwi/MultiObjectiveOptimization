@@ -64,7 +64,6 @@ class TencentDecoder(nn.Module):
         # if self.global_patch :
         # weight of gp = 0.4
         # w = [0.6/self.patch_size for i in range(0, self.patch_size)]
-        w = self.weights
         # w.append(0.4)
         # else :
         # ps = self.patch_size
@@ -72,9 +71,9 @@ class TencentDecoder(nn.Module):
 
         out = patches.reshape(-1, self.patch_size, 5)
         # w = torch.tensor(w)
-        w = w.expand(out.shape[0], -1) 
-        w = w.view(-1, 1, self.patch_size)
-        out = torch.bmm(w, out)
+        self.weights = self.weights.expand(out.shape[0], -1) 
+        self.weights = self.weights.view(-1, 1, self.patch_size)
+        out = torch.bmm(self.weights, out)
         return out
 
     def forward(self, conv_out, mask):
