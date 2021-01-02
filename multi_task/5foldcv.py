@@ -12,7 +12,7 @@ def _5foldcv() :
         "test": False,
         'dropout_prob': 0.75,
         'lr': 0.001,
-        'batch_size': 8,
+        'batch_size': 6,
         'img_h': 454,
         'img_w': 984,
         'patch_size' : 4,
