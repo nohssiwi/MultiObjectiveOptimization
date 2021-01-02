@@ -131,8 +131,8 @@ class TENCENT(data.Dataset):
         # transpose to make sure width > height
         if (width < height) :
             img = img.permute(0, 2, 1)
-        if (self.type == 'cv_train') :
-            img = flip(img)
+        # if (self.type == 'cv_train') :
+        #     img = flip(img)
         # global patch
         if self.global_patch :
             patch_global = resize_global(img)
@@ -141,8 +141,8 @@ class TENCENT(data.Dataset):
         patches = []
         for i in range(0, self.patch_size) :  
             patch = crop(img)
-            # if (self.type == 'cv_train') :
-                # patch = flip(patch)
+            if (self.type == 'cv_train') :
+                patch = flip(patch)
             patches.append(patch)
         if self.global_patch :
             patches.append(patch_global)
