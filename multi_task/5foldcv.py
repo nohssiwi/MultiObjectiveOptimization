@@ -25,20 +25,22 @@ def _5foldcv() :
     plcc_list = []
     epoch_list = []
     identifier = ''
-    for i in range(0, 5) :
-        print(i+1, ' fold')
-        try:
-            identifier, plcc, epoch = train_multi_task(params, i+1)
-        except RuntimeError as exception:
-            if "out of memory" in str(exception):
-                print("WARNING: out of memory")
-            if hasattr(torch.cuda, 'empty_cache'):
-                torch.cuda.empty_cache()
-            else:
-                raise exception
-        # identifier, plcc, epoch = train_multi_task(params, i+1)
-        plcc_list.append(plcc)
-        epoch_list.append(epoch)
+    # for i in range(0, 5) :
+    i = 2
+    print(i+1, ' fold')
+    try:
+        identifier, plcc, epoch = train_multi_task(params, i+1)
+    except RuntimeError as exception:
+        if "out of memory" in str(exception):
+            print("WARNING: out of memory")
+        if hasattr(torch.cuda, 'empty_cache'):
+            torch.cuda.empty_cache()
+        else:
+            raise exception
+    # identifier, plcc, epoch = train_multi_task(params, i+1)
+    plcc_list.append(plcc)
+    epoch_list.append(epoch)
+
     print(plcc_list)
     print(epoch_list)
     best_plcc = max(plcc_list)
