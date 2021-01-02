@@ -1,4 +1,5 @@
 from main import train_multi_task
+import torch
 
 def _5foldcv() :
     params = {
@@ -11,7 +12,7 @@ def _5foldcv() :
         "test": False,
         'dropout_prob': 0.75,
         'lr': 0.001,
-        'batch_size': 6,
+        'batch_size': 8,
         'img_h': 454,
         'img_w': 984,
         'patch_size' : 4,
@@ -26,7 +27,16 @@ def _5foldcv() :
     identifier = ''
     for i in range(0, 5) :
         print(i+1, ' fold')
-        identifier, plcc, epoch = train_multi_task(params, i+1)
+        try:
+            identifier, plcc, epoch = train_multi_task(params, i+1)
+        except RuntimeError as exception:
+            if "out of memory" in str(exception):
+                print("WARNING: out of memory")
+            if hasattr(torch.cuda, 'empty_cache'):
+                torch.cuda.empty_cache()
+            else:
+                raise exception
+        # identifier, plcc, epoch = train_multi_task(params, i+1)
         plcc_list.append(plcc)
         epoch_list.append(epoch)
     print(plcc_list)
