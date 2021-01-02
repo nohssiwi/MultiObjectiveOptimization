@@ -53,27 +53,27 @@ class TencentDecoder(nn.Module):
         # self.fc = nn.Linear(32768, 5)# resnet50
         self.s = nn.Softmax(dim=1)
 
-    # def aggragate(self, patches) :    
-    #     if self.global_patch :
-    #         # weight of gp = 0.4
-    #         ps = self.patch_size + 1
-    #         w = [0.7/self.patch_size for i in range(0, self.patch_size)]
-    #         w.append(0.3)
-    #     else :
-    #         ps = self.patch_size
-    #         w = [1/self.patch_size for i in range(0, self.patch_size)]
-    #     cuda0 = torch.device('cuda:0')
-    #     w = torch.tensor(w, device=cuda0)
-    #     out = patches.view(-1, ps, 5)
-    #     w = w.expand(out.shape[0], -1) 
-    #     w = w.view(-1, 1, ps)
-    #     out = torch.bmm(w, out)
-    #     return out
-
-    def aggragate(self, patches) :
-        out = patches.view(-1, self.patch_size, 5)
-        out = torch.sum(out, dim=1) / self.patch_size
+    def aggragate(self, patches) :    
+        if self.global_patch :
+            # weight of gp = 0.4
+            ps = self.patch_size + 1
+            w = [0.4/self.patch_size for i in range(0, self.patch_size)]
+            w.append(0.6)
+        else :
+            ps = self.patch_size
+            w = [1/self.patch_size for i in range(0, self.patch_size)]
+        cuda0 = torch.device('cuda:0')
+        w = torch.tensor(w, device=cuda0)
+        out = patches.view(-1, ps, 5)
+        w = w.expand(out.shape[0], -1) 
+        w = w.view(-1, 1, ps)
+        out = torch.bmm(w, out)
         return out
+
+    # def aggragate(self, patches) :
+    #     out = patches.view(-1, self.patch_size, 5)
+    #     out = torch.sum(out, dim=1) / self.patch_size
+    #     return out
 
     def forward(self, conv_out, mask):
         out = self.dropout(conv_out)
