@@ -47,7 +47,7 @@ class TencentDecoder(nn.Module):
     def __init__(self, patch_size, global_patch, prob=0.75):
         super(TencentDecoder, self).__init__()
         self.global_patch = global_patch
-        self.patch_size = patch_size + 1
+        self.patch_size = patch_size
         self.dropout = nn.Dropout(prob)
         self.fc = nn.Linear(8192, 5)# resnet18
         # self.fc = nn.Linear(32768, 5)# resnet50
