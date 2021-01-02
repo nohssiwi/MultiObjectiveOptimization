@@ -25,6 +25,8 @@ def _5foldcv() :
     plcc_list = []
     epoch_list = []
     identifier = ''
+    plcc = 0
+    epoch = 0
     # for i in range(0, 5) :
     i = 2
     print(i+1, ' fold')

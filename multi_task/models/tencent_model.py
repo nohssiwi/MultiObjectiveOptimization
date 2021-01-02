@@ -71,7 +71,7 @@ class TencentDecoder(nn.Module):
     #     return out
 
     def aggragate(self, patches) :
-        out = patches.reshape(-1, self.patch_size, 5)
+        out = patches.view(-1, self.patch_size, 5)
         out = torch.sum(out, dim=1) / self.patch_size
         return out
 
