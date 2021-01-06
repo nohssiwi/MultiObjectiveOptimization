@@ -54,6 +54,9 @@ def train_multi_task(params, fold=0):
     for m in model:
         model_params += model[m].parameters()
 
+    print('model params:')
+    print(model_params)
+
     if 'RMSprop' in params['optimizer']:
         optimizer = torch.optim.RMSprop(model_params, lr=params['lr'])
     elif 'Adam' in params['optimizer']:
