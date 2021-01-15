@@ -52,7 +52,7 @@ def _5foldcv() :
     params['train'] = False
     params['test'] = True 
     # params['exp_identifier'] = identifier
-    print('best :', best_epoch, index + 1)   
+    # print('best :', best_epoch, index + 1)   
     params['exp_identifier'] = 'optimizer=SGD|dropout_prob=0.75|lr=0.001|batch_size=4|img_h=454|img_w=984|patch_size=0|global_patch=True|crop_h=340|crop_w=738|crop_or_pad=True'
     params['batch_size'] = 1
     print('test')
