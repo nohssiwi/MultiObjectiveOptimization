@@ -49,8 +49,8 @@ class TencentDecoder(nn.Module):
         self.global_patch = global_patch
         self.patch_size = patch_size
         self.dropout = nn.Dropout(prob)
-        self.fc = nn.Linear(8192, 5)# resnet18
-        # self.fc = nn.Linear(32768, 5)# resnet50
+        # self.fc = nn.Linear(8192, 5)# resnet18
+        self.fc = nn.Linear(32768, 5)# resnet50
         self.s = nn.Softmax(dim=1)
 
     def aggragate(self, patches) :    

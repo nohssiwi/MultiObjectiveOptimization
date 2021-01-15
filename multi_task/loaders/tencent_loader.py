@@ -21,7 +21,7 @@ class TENCENT(data.Dataset):
         self.crop_or_pad = crop_or_pad
 
         data = pd.read_csv(root + '/subjective_scores_v2/all.csv')
-        data = data[data['type']!='train']
+        # data = data[data['type']!='train']
         cv = pd.read_csv(root + '/subjective_scores_v2/5fold.csv')
 
         dataset = {
@@ -88,7 +88,7 @@ class TENCENT(data.Dataset):
             else :
                 img = self.transform_img(img)
 
-        return img, label_h, label_c, label_f, label_o
+        return img, label_h, label_c, label_f, label_o, filename
 
 
     def transform_img(self, img):
