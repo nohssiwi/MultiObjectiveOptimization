@@ -124,8 +124,8 @@ def objective(trial):
     }
 
     # _, plcc, _ = train_multi_task(params)
-    train_multi_task(params)
-    return 1
+    plcc = train_multi_task(params)
+    return plcc
 
 
 if __name__ == '__main__':
