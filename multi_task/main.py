@@ -301,7 +301,7 @@ def train_multi_task(params, fold=0):
             # write to file
             pred_txt = '{}; H = {}; H_gt = {}; C = {}; C_gt = {}; F = {}; F_gt = {}; O : {}; O_gt = {}\n'.format(filename, pred_scores[0], 
             gt_scores[0], pred_scores[1], gt_scores[1], pred_scores[2], gt_scores[2], pred_scores[3], gt_scores[3])
-            with open('./pred.txt', 'a') as f:
+            with open('./pred.csv', 'a') as f:
                 f.write(pred_txt)
 
         print('test:')
