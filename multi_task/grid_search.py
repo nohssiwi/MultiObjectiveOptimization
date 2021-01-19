@@ -111,7 +111,7 @@ def objective(trial):
         "grid_search": True,
         "train": False,
         "test": False,
-        'dropout_prob': trial.suggest_float('dropout_prob', 0.1, 0.9, step=0.01),
+        'dropout_prob': trial.suggest_float('dropout_prob', 0.10, 0.90, step=0.01),
         'lr': trial.suggest_loguniform('lr', 1e-5, 1e-1),
         # 'dropout_prob': 0.75,
         # 'lr': 0.001,
