@@ -1,5 +1,6 @@
 from main import train_multi_task
 import torch
+import optuna
 
 def grid_search() :
     ''' 
@@ -100,9 +101,37 @@ def grid_search() :
                                                 continue
 
 
+def objective(trial):
+
+    params = {
+        "dataset": "tencent",
+        "tasks": ["H", "C", "F", "O"],
+        "optimizer": "SGD",
+        "normalization_type": "loss+",
+        "grid_search": True,
+        "train": False,
+        "test": False,
+        'dropout_prob': trial.suggest_float('dropout_prob', 0.1, 0.9),
+        'lr': trial.suggest_float('lr', 1e-5, 1e-1),
+        'batch_size': 4,
+        'img_h': 454,
+        'img_w': 984,
+        'patch_size' : 0,
+        'global_patch': True,
+        'crop_h' : 340,
+        'crop_w' : 738,
+        'crop_or_pad' : True
+    }
+
+    identifier, plcc, epoch = train_multi_task(params)
+    
+    return plcc
+
 
 if __name__ == '__main__':
-    grid_search()
+    # grid_search()
+    study = optuna.create_study(direction='maximize')
+    study.optimize(objective, n_trials=10)
 
 
 

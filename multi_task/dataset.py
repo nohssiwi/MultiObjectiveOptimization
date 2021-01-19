@@ -23,15 +23,24 @@ def get_dataset(params, configs, fold=0):
         print('ERROR: No dataset is specified')
     
     if 'tencent' in params['dataset']:
-        train_dst = TENCENT(root=configs['tencent']['path'], is_transform=True, type='cv_train', fold=fold,
+        # train_dst = TENCENT(root=configs['tencent']['path'], is_transform=True, type='cv_train', fold=fold,
+        #     patch_size=params['patch_size'], global_patch=params['global_patch'], crop_or_pad=params['crop_or_pad'], 
+        #     img_h=params['img_h'], img_w=params['img_w'], 
+        #     crop_size=(params['crop_h'], params['crop_w']))
+        # val_dst = TENCENT(root=configs['tencent']['path'], is_transform=True, type='cv_val', fold=fold,
+        #     patch_size=params['patch_size'], global_patch=params['global_patch'], crop_or_pad=params['crop_or_pad'], 
+        #     img_h=params['img_h'], img_w=params['img_w'],
+        #     crop_size=(params['crop_h'], params['crop_w']))
+
+        train_dst = TENCENT(root=configs['tencent']['path'], is_transform=True, type='train', fold=fold,
             patch_size=params['patch_size'], global_patch=params['global_patch'], crop_or_pad=params['crop_or_pad'], 
             img_h=params['img_h'], img_w=params['img_w'], 
             crop_size=(params['crop_h'], params['crop_w']))
-        val_dst = TENCENT(root=configs['tencent']['path'], is_transform=True, type='cv_val', fold=fold,
+
+        val_dst = TENCENT(root=configs['tencent']['path'], is_transform=True, type='val', fold=fold,
             patch_size=params['patch_size'], global_patch=params['global_patch'], crop_or_pad=params['crop_or_pad'], 
             img_h=params['img_h'], img_w=params['img_w'],
             crop_size=(params['crop_h'], params['crop_w']))
-
 
         test_dst = TENCENT(root=configs['tencent']['path'], is_transform=True, type='test', 
             patch_size=params['patch_size'], global_patch=params['global_patch'], crop_or_pad=params['crop_or_pad'], 
@@ -50,7 +59,7 @@ def get_dataset(params, configs, fold=0):
         # return train_loader, train_dst, val_loader, val_dst, test_dst, test_loader
 
         if params['grid_search'] :
-            return val_loader, val_dst
+            return train_loader, train_dst, val_loader, val_dst
         if params['train'] :
             return train_loader, train_dst, val_loader, val_dst
         if params['test'] :
