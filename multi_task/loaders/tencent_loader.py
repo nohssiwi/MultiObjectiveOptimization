@@ -56,9 +56,11 @@ class TENCENT(data.Dataset):
             }
         
             if row['5fold'] == self.fold :
-                dataset['cv_val'].append(item)
-            else :
+                # dataset['cv_val'].append(item)
                 dataset['cv_train'].append(item)
+            else :
+                # dataset['cv_train'].append(item)
+                dataset['cv_val'].append(item)
 
         self.dataset = dataset
 
