@@ -286,20 +286,21 @@ def train_multi_task(params, fold=0):
             filename = batch_test[5]
             # predicted scores
             pred_scores = []
+            gt_scores = []
             test_rep, _ = model['rep'](test_images, None)
             for t in tasks:
                 out_t_test, _ = model[t](test_rep, None)
                 # add score to list
                 pred_scores.append(calculate_score(out_t_test.data.cpu().numpy().reshape(-1,5)))
-
+                gt_scores.append(calculate_score(labels_test[t].data.cpu().numpy().reshape(-1,5)))
                 test_loss_t = loss_fn[t](out_t_test, labels_test[t])
                 test_tot_loss['all'] += test_loss_t.item()
                 test_tot_loss[t] += test_loss_t.item()
                 metric[t].update(out_t_test, labels_test[t])
             num_test_batches+=1
             # write to file
-            pred_txt = '{} : H : {}, C : {}, F : {}, O : {}\n'.format(filename, pred_scores[0], pred_scores[1],
-            pred_scores[2], pred_scores[3])
+            pred_txt = '{}; H = {}; H_gt = {}; C = {}; C_gt = {}; F = {}; F_gt = {}; O : {}; O_gt = {}\n'.format(filename, pred_scores[0], 
+            gt_scores[0], pred_scores[1], gt_scores[1], pred_scores[2], gt_scores[2], pred_scores[3], gt_scores[3])
             with open('./pred.txt', 'a') as f:
                 f.write(pred_txt)
 
