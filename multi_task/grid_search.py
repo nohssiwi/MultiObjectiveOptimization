@@ -123,9 +123,9 @@ def objective(trial):
         'crop_or_pad' : True
     }
 
-    _, plcc, _ = train_multi_task(params)
-    print(plcc)
-    return plcc
+    # _, plcc, _ = train_multi_task(params)
+    train_multi_task(params)
+    return 1
 
 
 if __name__ == '__main__':
