@@ -123,8 +123,8 @@ def objective(trial):
         'crop_or_pad' : True
     }
 
-    identifier, plcc, epoch = train_multi_task(params)
-    
+    _, plcc, _ = train_multi_task(params)
+    print(plcc)
     return plcc
 
 
