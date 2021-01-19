@@ -133,7 +133,7 @@ def objective(trial):
 if __name__ == '__main__':
     # grid_search()
     study = optuna.create_study(direction='maximize')
-    study.optimize(objective, n_trials=10)
+    study.optimize(objective, n_trials=20)
 
 
 
