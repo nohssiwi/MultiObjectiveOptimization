@@ -2,6 +2,7 @@ import os
 import click
 import json
 import datetime
+import numpy as np
 from timeit import default_timer as timer
 
 import torch
