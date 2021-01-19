@@ -85,7 +85,7 @@ def train_multi_task(params, fold=0):
     best_epoch = 0
 
     # train
-    if params['train'] :
+    if params['train'] or params['grid_search']:
 
         for epoch in tqdm(range(NUM_EPOCHS)):
             start = timer()
