@@ -289,7 +289,7 @@ def train_multi_task(params, fold=0):
             for t in tasks:
                 out_t_test, _ = model[t](test_rep, None)
                 # add score to list
-                pred_scores.append(metric.calculate_score(out_t_test.data.cpu().numpy().reshape(-1,5)))
+                pred_scores.append(calculate_score(out_t_test.data.cpu().numpy().reshape(-1,5)))
 
                 test_loss_t = loss_fn[t](out_t_test, labels_test[t])
                 test_tot_loss['all'] += test_loss_t.item()
