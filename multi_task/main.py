@@ -233,7 +233,7 @@ def train_multi_task(params, fold=0):
                     key_name = 'model_{}'.format(t)
                     state[key_name] = model[t].state_dict()
 
-                torch.save(state, "saved_models/{}_{}_{}_model.pkl".format(exp_identifier, epoch+1, fold))
+                # torch.save(state, "saved_models/{}_{}_{}_model.pkl".format(exp_identifier, epoch+1, fold))
                 best_epoch = epoch + 1
                 # reset count
                 count = 0
