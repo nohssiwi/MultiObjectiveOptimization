@@ -215,8 +215,8 @@ def train_multi_task(params, fold=0):
                     metric_str += '{} = {}  '.format(metric_key, metric_results[metric_key])
                 metric[t].reset()
                 metric_str += 'loss = {}'.format(tot_loss[t]/num_val_batches)
-                print(metric_str)
-            print('all loss = {}'.format(tot_loss['all']/len(val_dst)))
+                # print(metric_str)
+            # print('all loss = {}'.format(tot_loss['all']/len(val_dst)))
             # writer.add_scalar('validation_loss', tot_loss['all']/len(val_dst), n_iter)
             avg_plcc /= 4
 
@@ -240,7 +240,7 @@ def train_multi_task(params, fold=0):
             elif init_val_plcc >= avg_plcc:
                 count += 1
                 if count == 10:
-                    print('Val EMD loss has not decreased in %d epochs. Training terminated.' % 10)
+                    # print('Val EMD loss has not decreased in %d epochs. Training terminated.' % 10)
                     break
 
             end = timer()

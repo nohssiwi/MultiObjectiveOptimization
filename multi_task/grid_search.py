@@ -112,7 +112,7 @@ def objective(trial):
         "train": False,
         "test": False,
         'dropout_prob': trial.suggest_float('dropout_prob', 0.10, 0.90, step=0.01),
-        'lr': trial.suggest_loguniform('lr', 1e-5, 1e-1),
+        'lr': trial.suggest_loguniform('lr', 1e-4, 1e-1),
         # 'dropout_prob': 0.75,
         # 'lr': 0.001,
         'batch_size': 4,
