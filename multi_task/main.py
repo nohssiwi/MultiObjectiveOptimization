@@ -41,14 +41,14 @@ def train_multi_task(params, fold=0):
 
     if params['train'] :
         train_loader, train_dst, val_loader, val_dst = dataset_selector.get_dataset(params, configs, fold)
-        writer = SummaryWriter(log_dir='5fold_runs/{}_{}'.format(exp_identifier, datetime.datetime.now().strftime("%I:%M%p on %B %d, %Y")))
+        # writer = SummaryWriter(log_dir='5fold_runs/{}_{}'.format(exp_identifier, datetime.datetime.now().strftime("%I:%M%p on %B %d, %Y")))
 
     if params['test'] :
         test_loader, test_dst = dataset_selector.get_dataset(params, configs)
 
     if params['grid_search'] :
         train_loader, train_dst, val_loader, val_dst = dataset_selector.get_dataset(params, configs, fold)
-        writer = SummaryWriter(log_dir='gs_runs/{}_{}'.format(exp_identifier, datetime.datetime.now().strftime("%I:%M%p on %B %d, %Y")))
+        # writer = SummaryWriter(log_dir='gs_runs/{}_{}'.format(exp_identifier, datetime.datetime.now().strftime("%I:%M%p on %B %d, %Y")))
 
     loss_fn = loss_selector.get_loss(params)
     metric = metrics_selector.get_metrics(params)
@@ -167,9 +167,9 @@ def train_multi_task(params, fold=0):
                 loss.backward()
                 optimizer.step()
 
-                writer.add_scalar('training_loss', loss.item(), n_iter)
-                for t in tasks:
-                    writer.add_scalar('training_loss_{}'.format(t), loss_data[t], n_iter)
+                # writer.add_scalar('training_loss', loss.item(), n_iter)
+                # for t in tasks:
+                #     writer.add_scalar('training_loss_{}'.format(t), loss_data[t], n_iter)
             
             # validation
             for m in model:
@@ -206,18 +206,18 @@ def train_multi_task(params, fold=0):
 
             avg_plcc = 0
             for t in tasks:
-                writer.add_scalar('validation_loss_{}'.format(t), tot_loss[t]/num_val_batches, n_iter)
+                # writer.add_scalar('validation_loss_{}'.format(t), tot_loss[t]/num_val_batches, n_iter)
                 metric_results = metric[t].get_result()
                 avg_plcc += metric_results['plcc']
                 metric_str = 'task_{} : '.format(t)
                 for metric_key in metric_results:
-                    writer.add_scalar('metric_{}_{}'.format(metric_key, t), metric_results[metric_key], n_iter)
+                    # writer.add_scalar('metric_{}_{}'.format(metric_key, t), metric_results[metric_key], n_iter)
                     metric_str += '{} = {}  '.format(metric_key, metric_results[metric_key])
                 metric[t].reset()
                 metric_str += 'loss = {}'.format(tot_loss[t]/num_val_batches)
                 print(metric_str)
             print('all loss = {}'.format(tot_loss['all']/len(val_dst)))
-            writer.add_scalar('validation_loss', tot_loss['all']/len(val_dst), n_iter)
+            # writer.add_scalar('validation_loss', tot_loss['all']/len(val_dst), n_iter)
             avg_plcc /= 4
 
             print(avg_plcc)
